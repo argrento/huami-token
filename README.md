@@ -1,6 +1,7 @@
 # Huami-token
 
-Script to obtain watch or band bluetooth acess token from Huami servers
+Script to obtain watch or band bluetooth acess token from Huami servers. 
+It will also download AGPS data packs `cep_alm_pak.zip` and `cep_7days.zip`.
 
 ## About
 
@@ -85,6 +86,7 @@ the second one is my Xiaomi Mi Smart Scale._
 * random
 * uuid
 * json
+* shutil
 
 ## Versioning
 
