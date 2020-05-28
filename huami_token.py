@@ -6,6 +6,7 @@ import urllib
 import random
 import uuid
 import json
+import shutil
 
 
 class HuamiAmazfit:
@@ -165,6 +166,26 @@ class HuamiAmazfit:
                 mac_address,
                 auth_key))
 
+    def get_gps_data(self):
+        agps_packs = ["AGPS_ALM", "AGPSZIP"]
+        agps_file_names = ["cep_alm_pak.zip", "cep_7days.zip"]
+        agps_link = "https://api-mifit-us2.huami.com/apps/com.huami.midong/fileTypes/{}/files"
+
+        headers = {
+            'apptoken': self.app_token,
+        }
+
+        for idx, agps_pack_name in enumerate(agps_packs):
+            print("Downloading {}...".format(agps_pack_name))
+            response = requests.get(agps_link.format(agps_pack_name), headers=headers)
+            response.raise_for_status()
+            agps_result = response.json()[0]
+            if 'fileUrl' not in agps_result:
+                raise ValueError("No 'fileUrl' parameter in files request.")
+            with requests.get(agps_result['fileUrl'], stream=True) as r:
+                with open(agps_file_names[idx], 'wb') as f:
+                    shutil.copyfileobj(r.raw, f)
+
     def logout(self):
         logout_url = "https://account-us2.huami.com/v1/client/logout"
         data = {
@@ -173,6 +194,7 @@ class HuamiAmazfit:
         response = requests.post(logout_url, data=data)
         logout_result = response.json()
 
+        print(logout_result)
         if logout_result['result'] == 'ok':
             print("\nLogged out.")
         else:
@@ -180,7 +202,8 @@ class HuamiAmazfit:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Obtain Bluetooth Auth key from Amazfit servers")
+    parser = argparse.ArgumentParser(description="Obtain Bluetooth Auth key from Amazfit "
+                                                 "servers and download AGPS data.")
     parser.add_argument("-m",
                         "--method",
                         choices=["amazfit", "xiaomi"],
@@ -203,4 +226,5 @@ if __name__ == "__main__":
     device.get_access_token()
     device.login()
     device.get_wearable_auth_keys()
+    device.get_gps_data()
     device.logout()
