@@ -32,14 +32,14 @@ class HuamiAmazfit:
                                                       random.randint(0, 255))
 
     def get_access_token(self):
-        print("Getting access token with {} login method...".format(self.method))
+        print(f"Getting access token with {self.method} login method...")
 
         if self.method == 'xiaomi':
             login_url = "https://account.xiaomi.com/oauth2/authorize?skip_confirm=false&" \
                         "client_id=2882303761517383915&pt=0&scope=1+6000+16001+20000&" \
                         "redirect_uri=https%3A%2F%2Fhm.xiaomi.com%2Fwatch.do&_locale=en_US&response_type=code"
 
-            print("Copy this URL to web-browser \n\n{}\n\nand login to your Mi account.".format(login_url))
+            print(f"Copy this URL to web-browser \n\n{login_url}\n\nand login to your Mi account.")
 
             token_url = input("\nPaste URL after redirection here.\n")
 
@@ -54,7 +54,7 @@ class HuamiAmazfit:
 
         elif self.method == 'amazfit':
 
-            auth_url = 'https://api-user.huami.com/registrations/{}/tokens'.format(urllib.parse.quote(self.email))
+            auth_url = f"https://api-user.huami.com/registrations/{urllib.parse.quote(self.email)}/tokens"
             data = {
                 'state':        'REDIRECTION',
                 'client_id':    'HuaMi',
@@ -73,7 +73,7 @@ class HuamiAmazfit:
             redirect_url_parameters = urllib.parse.parse_qs(redirect_url.query)
 
             if 'error' in redirect_url_parameters:
-                raise ValueError("Wrong E-mail or Password. Error: {}".format(redirect_url_parameters['error']))
+                raise ValueError(f"Wrong E-mail or Password. Error: {redirect_url_parameters['error']}")
 
             if 'access' not in redirect_url_parameters:
                 raise ValueError("No 'access' parameter in login url.")
@@ -113,7 +113,7 @@ class HuamiAmazfit:
         login_result = response.json()
 
         if 'error_code' in login_result:
-            raise ValueError("Login error. Error: {}".format(login_result['error_code']))
+            raise ValueError(f"Login error. Error: {login_result['error_code']}")
 
         if 'token_info' not in login_result:
             raise ValueError("No 'token_info' parameter in login data.")
@@ -135,7 +135,7 @@ class HuamiAmazfit:
     def get_wearable_auth_keys(self):
         print("Getting linked wearables...\n")
 
-        devices_url = "https://api-mifit-us2.huami.com/users/{}/devices".format(urllib.parse.quote(self.user_id))
+        devices_url = f"https://api-mifit-us2.huami.com/users/{urllib.parse.quote(self.user_id)}/devices"
         headers = {
             'apptoken': self.app_token
         }
@@ -161,10 +161,7 @@ class HuamiAmazfit:
             key_str = device_info['auth_key']
             auth_key = '0x' + (key_str if key_str != '' else '0')
 
-            print("Device {}. Mac = {}, auth_key = {}".format(
-                idx+1,
-                mac_address,
-                auth_key))
+            print(f"Device {idx+1}. Mac = {mac_address}, auth_key = {auth_key}")
 
     def get_gps_data(self):
         agps_packs = ["AGPS_ALM", "AGPSZIP"]
