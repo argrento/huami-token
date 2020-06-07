@@ -8,6 +8,9 @@ import urllib
 import argparse
 import requests
 
+from rich.console import Console
+from rich.table import Column, Table
+
 import urls
 
 
@@ -120,7 +123,7 @@ class HuamiAmazfit:
         print("Logged in! User id: {}".format(self.user_id))
 
     def get_wearable_auth_keys(self):
-        print("Getting linked wearables...\n")
+        print("Getting linked wearables...")
 
         devices_url = urls.URLS['devices'].format(user_id=urllib.parse.quote(self.user_id))
 
@@ -134,6 +137,8 @@ class HuamiAmazfit:
             raise ValueError("No 'items' parameter in devices data.")
         devices = device_request['items']
 
+        devices_dict = {}
+
         for idx, wearable in enumerate(devices):
             if 'macAddress' not in wearable:
                 raise ValueError("No 'macAddress' parameter in device data.")
@@ -146,9 +151,11 @@ class HuamiAmazfit:
             if 'auth_key' not in device_info:
                 raise ValueError("No 'auth_key' parameter in device data.")
             key_str = device_info['auth_key']
-            auth_key = '0x' + (key_str if key_str != '' else '0')
+            auth_key = '0x' + (key_str if key_str != '' else '00')
 
-            print(f"Device {idx+1}. Mac = {mac_address}, auth_key = {auth_key}")
+            devices_dict[f'{mac_address}'] = auth_key
+
+        return devices_dict
 
     def get_gps_data(self):
         agps_packs = ["AGPS_ALM", "AGPSZIP"]
@@ -203,11 +210,21 @@ if __name__ == "__main__":
                         help="Account Password")
     args = parser.parse_args()
 
+    console = Console()
+    table = Table(show_header=True, header_style="bold")
+    table.add_column("MAC", style="dim", width=17, justify='center')
+    table.add_column("auth_key", width=36, justify='center')
+
     device = HuamiAmazfit(method=args.method,
                           email=args.email,
                           password=args.password)
     device.get_access_token()
     device.login()
-    device.get_wearable_auth_keys()
+
+    device_keys = device.get_wearable_auth_keys()
+    for device_key in device_keys:
+        table.add_row(device_key, device_keys[device_key])
+    console.print(table)
+
     device.get_gps_data()
     device.logout()

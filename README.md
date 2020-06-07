@@ -29,8 +29,13 @@ Token: ['UaFHW53RJVYwqXaa7ncPQ']
 Logging in...
 Logged in! User id: 1234567890
 Getting linked wearables...
-
-Device 1. Mac = AB:CD:EF:12:34:56, auth_key = 0xa3c10e34e5c14637eea6b9efc061069
+┏━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃        MAC        ┃               auth_key               ┃
+┡━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ AB:CD:EF:12:34:56 │   0xa3c10e34e5c14637eea6b9efc06106   │
+└───────────────────┴──────────────────────────────────────┘
+Downloading AGPS_ALM...
+Downloading AGPSZIP...
 
 Logged out.
 ```
@@ -64,9 +69,14 @@ Token: ['ALSG_CLOUDSRV_9B8D87D0EB77C71B45FF73B2266D922B']
 Logging in...
 Logged in! User id: 3000654321
 Getting linked wearables...
-
-Device 1. Mac = 12:34:56:AB:CD:EF, auth_key = 0x3c10e34e5c1463527579996fa83e6d
-Device 2. Mac = BA:DC:FE:21:43:65, auth_key = 0x0
+┏━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃        MAC        ┃               auth_key               ┃
+┡━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ 12:34:56:AB:CD:EF │   0x3c10e34e5c1463527579996fa83e6d   │
+│ BA:DC:FE:21:43:65 │                 0x00                 │
+└───────────────────┴──────────────────────────────────────┘
+Downloading AGPS_ALM...
+Downloading AGPSZIP...
 
 Logged out.
 ```
@@ -87,6 +97,7 @@ the second one is my Xiaomi Mi Smart Scale._
 * uuid
 * json
 * shutil
+* rich
 
 ## Versioning
 
@@ -95,5 +106,3 @@ We use [SemVer](http://semver.org/) for versioning. For the versions available, 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
-
-
