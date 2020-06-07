@@ -1,4 +1,2 @@
-argparse
 requests
-urllib
 rich
