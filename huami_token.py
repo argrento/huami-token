@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 
+import json
+import uuid
+import random
+import shutil
+import urllib
 import argparse
 import requests
-import urllib
-import random
-import uuid
-import json
-import shutil
+
+import urls
 
 
 class HuamiAmazfit:
@@ -35,9 +37,7 @@ class HuamiAmazfit:
         print(f"Getting access token with {self.method} login method...")
 
         if self.method == 'xiaomi':
-            login_url = "https://account.xiaomi.com/oauth2/authorize?skip_confirm=false&" \
-                        "client_id=2882303761517383915&pt=0&scope=1+6000+16001+20000&" \
-                        "redirect_uri=https%3A%2F%2Fhm.xiaomi.com%2Fwatch.do&_locale=en_US&response_type=code"
+            login_url = urls.URLS["login_xiaomi"]
 
             print(f"Copy this URL to web-browser \n\n{login_url}\n\nand login to your Mi account.")
 
@@ -54,17 +54,11 @@ class HuamiAmazfit:
 
         elif self.method == 'amazfit':
 
-            auth_url = f"https://api-user.huami.com/registrations/{urllib.parse.quote(self.email)}/tokens"
-            data = {
-                'state':        'REDIRECTION',
-                'client_id':    'HuaMi',
-                'password':     self.password,
-                'redirect_uri': 'https://s3-us-west-2.amazonws.com/hm-registration/successsignin.html',
-                'region':       'us-west-2',
-                'token':        'access',
-                'country_code': 'US'
+            auth_url = urls.URLS['tokens_amazfit'].format(user_email=urllib.parse.quote(self.email))
 
-            }
+            data = urls.PAYLOADS['tokens_amazfit']
+            data['password'] = self.password
+
             response = requests.post(auth_url, data=data, allow_redirects=False)
             response.raise_for_status()
 
@@ -92,22 +86,15 @@ class HuamiAmazfit:
         if external_token:
             self.access_token = external_token
 
-        login_url = 'https://account.huami.com/v2/client/login'
-        data = {
-            'dn':                 'account.huami.com,api-user.huami.com,app-analytics.huami.com,api-watch.huami.com,'
-                                  'api-analytics.huami.com,api-mifit.huami.com',
-            'app_version':        '4.3.0-play',
-            'source':             'com.huami.watch.hmwatchmanager:4.3.0-play:100152',
-            'country_code':       self.country_code,
-            'device_id':          self.device_id,
-            'third_name':         'huami' if self.method == 'amazfit' else 'mi-watch',
-            'lang':               'en',
-            'device_model':       'android_phone',
-            'allow_registration': 'false',
-            'app_name':           'com.huami.midong',
-            'code':               self.access_token,
-            'grant_type':         'access_token' if self.method == 'amazfit' else 'request_token'
-        }
+        login_url = urls.URLS['login_amazfit']
+
+        data = urls.PAYLOADS['login_amazfit']
+        data['country_code'] = self.country_code
+        data['device_id'] = self.device_id
+        data['third_name'] = 'huami' if self.method == 'amazfit' else 'mi-watch'
+        data['code'] = self.access_token
+        data['grant_type'] = 'access_token' if self.method == 'amazfit' else 'request_token'
+
         response = requests.post(login_url, data=data, allow_redirects=False)
         response.raise_for_status()
         login_result = response.json()
@@ -135,10 +122,10 @@ class HuamiAmazfit:
     def get_wearable_auth_keys(self):
         print("Getting linked wearables...\n")
 
-        devices_url = f"https://api-mifit-us2.huami.com/users/{urllib.parse.quote(self.user_id)}/devices"
-        headers = {
-            'apptoken': self.app_token
-        }
+        devices_url = urls.URLS['devices'].format(user_id=urllib.parse.quote(self.user_id))
+
+        headers = urls.PAYLOADS['devices']
+        headers['apptoken'] = self.app_token
 
         response = requests.get(devices_url, headers=headers)
         response.raise_for_status()
@@ -166,15 +153,14 @@ class HuamiAmazfit:
     def get_gps_data(self):
         agps_packs = ["AGPS_ALM", "AGPSZIP"]
         agps_file_names = ["cep_alm_pak.zip", "cep_7days.zip"]
-        agps_link = "https://api-mifit-us2.huami.com/apps/com.huami.midong/fileTypes/{}/files"
+        agps_link = urls.URLS['agps']
 
-        headers = {
-            'apptoken': self.app_token,
-        }
+        headers = urls.PAYLOADS['agps']
+        headers['apptoken'] = self.app_token
 
         for idx, agps_pack_name in enumerate(agps_packs):
             print("Downloading {}...".format(agps_pack_name))
-            response = requests.get(agps_link.format(agps_pack_name), headers=headers)
+            response = requests.get(agps_link.format(pack_name=agps_pack_name), headers=headers)
             response.raise_for_status()
             agps_result = response.json()[0]
             if 'fileUrl' not in agps_result:
@@ -184,14 +170,14 @@ class HuamiAmazfit:
                     shutil.copyfileobj(r.raw, f)
 
     def logout(self):
-        logout_url = "https://account-us2.huami.com/v1/client/logout"
-        data = {
-            'login_token': self.login_token
-        }
+        logout_url = urls.URLS['logout']
+
+        data = urls.PAYLOADS['logout']
+        data['login_token'] = self.login_token
+
         response = requests.post(logout_url, data=data)
         logout_result = response.json()
 
-        print(logout_result)
         if logout_result['result'] == 'ok':
             print("\nLogged out.")
         else:
