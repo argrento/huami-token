@@ -19,23 +19,21 @@ Huami servers.
 ```git clone https://github.com/argrento/huami-token.git```
 
 ## Logging in with Amazfit account
-Run script with your cridentials: `python huami_token.py --method amazfit --email youemail@example.com --password your_password`.
+Run script with your cridentials: `python huami_token.py --method amazfit --email youemail@example.com --password your_password --bt_keys`.
 
 Sample output:
 ```bash
-> python huami_token.py --method amazfit --email my_email --password password
+> python huami_token.py --method amazfit --email my_email --password password --bt_keys
 Getting access token with amazfit login method...
 Token: ['UaFHW53RJVYwqXaa7ncPQ']
 Logging in...
 Logged in! User id: 1234567890
 Getting linked wearables...
-┏━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃        MAC        ┃               auth_key               ┃
-┡━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
-│ AB:CD:EF:12:34:56 │   0xa3c10e34e5c14637eea6b9efc06106   │
-└───────────────────┴──────────────────────────────────────┘
-Downloading AGPS_ALM...
-Downloading AGPSZIP...
++----------------------------------------------------------+
+|        MAC        |               auth_key               |
+|-------------------+--------------------------------------|
+| AB:CD:EF:12:34:56 |   0xa3c10e34e5c14637eea6b9efc06106   |
++----------------------------------------------------------+
 
 Logged out.
 ```
@@ -45,7 +43,7 @@ Here the `auth_key` is the unique pairing key for your watch.
 ### Logging in with Xiaomi account
 This is a little bit harder to use, since you need to login manually on the Xiaomi web site.
 
-1. Run script `python huami_token.py --method xiaomi`.
+1. Run script `python huami_token.py --method xiaomi --bt_keys`.
 2. Script will ask you to open Xiaomi login web page. https://account.xiaomi.com/oauth2/authorize?skip_confirm=false&client_id=2882303761517383915&pt=0&scope=1+6000+16001+20000&redirect_uri=https%3A%2F%2Fhm.xiaomi.com%2Fwatch.do&_locale=en_US&response_type=code
 3. Login with your credentials there.
 4. If your login is successful, browser will show the error that connection is not secured. 
@@ -55,7 +53,7 @@ On this stage address will look like this: `https://hm.xiaomi.com/watch.do?code=
 
 Sample output:
 ```bash
-> python huami_token.py --method xiaomi
+> python huami_token.py --method xiaomi --bt_keys
 Getting access token with xiaomi login method...
 Copy this URL to web-browser
 
@@ -69,14 +67,12 @@ Token: ['ALSG_CLOUDSRV_9B8D87D0EB77C71B45FF73B2266D922B']
 Logging in...
 Logged in! User id: 3000654321
 Getting linked wearables...
-┏━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃        MAC        ┃               auth_key               ┃
-┡━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
-│ 12:34:56:AB:CD:EF │   0x3c10e34e5c1463527579996fa83e6d   │
-│ BA:DC:FE:21:43:65 │                 0x00                 │
-└───────────────────┴──────────────────────────────────────┘
-Downloading AGPS_ALM...
-Downloading AGPSZIP...
++----------------------------------------------------------+
+|        MAC        |               auth_key               |
+|-------------------+--------------------------------------|
+| 12:34:56:AB:CD:EF |   0x3c10e34e5c1463527579996fa83e6d   |
+| BA:DC:FE:21:43:65 |                 0x00                 |
++----------------------------------------------------------+
 
 Logged out.
 ```

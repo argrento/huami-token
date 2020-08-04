@@ -205,10 +205,35 @@ if __name__ == "__main__":
                         "--email",
                         required=False,
                         help="Account e-mail address")
+
     parser.add_argument("-p",
                         "--password",
                         required=False,
                         help="Account Password")
+
+    parser.add_argument("-b",
+                        "--bt_keys",
+                        required=False,
+                        action='store_true',
+                        help="Get bluetooth tokens of paired devices")
+
+    parser.add_argument("-g",
+                        "--gps",
+                        required=False,
+                        action='store_true',
+                        help="Download A-GPS files")
+    parser.add_argument("-a",
+                        "--all",
+                        required=False,
+                        action='store_true',
+                        help="Do everything: get bluetooth tokens, download A-GPS files")
+
+    parser.add_argument("-n",
+                        "--no_logout",
+                        required=False,
+                        action='store_true',
+                        help="Do not logout, keep active session and display app token and access token")
+
     args = parser.parse_args()
 
     console = Console()
@@ -222,10 +247,17 @@ if __name__ == "__main__":
     device.get_access_token()
     device.login()
 
-    device_keys = device.get_wearable_auth_keys()
-    for device_key in device_keys:
-        table.add_row(device_key, device_keys[device_key])
-    console.print(table)
+    if args.bt_keys or args.all:
+        device_keys = device.get_wearable_auth_keys()
+        for device_key in device_keys:
+            table.add_row(device_key, device_keys[device_key])
+        console.print(table)
 
-    device.get_gps_data()
-    device.logout()
+    if args.gps or args.all:
+        device.get_gps_data()
+
+    if args.no_logout:
+        print("\nNo logout!")
+        print(f"app_token={device.app_token}\nlogin_token={device.login_token}")
+    else:
+        device.logout()
