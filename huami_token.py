@@ -10,6 +10,7 @@ import requests
 
 from rich.console import Console
 from rich.table import Column, Table
+from rich import box
 
 import urls
 
@@ -211,7 +212,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     console = Console()
-    table = Table(show_header=True, header_style="bold")
+    table = Table(show_header=True, header_style="bold", box=box.ASCII)
     table.add_column("MAC", style="dim", width=17, justify='center')
     table.add_column("auth_key", width=36, justify='center')
 
