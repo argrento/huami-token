@@ -6,6 +6,7 @@ URLS = {
     'login_amazfit': 'https://account.huami.com/v2/client/login',
     'devices': 'https://api-mifit-us2.huami.com/users/{user_id}/devices',
     'agps': 'https://api-mifit-us2.huami.com/apps/com.huami.midong/fileTypes/{pack_name}/files',
+    'data_short': 'https://api-mifit-us2.huami.com/users/{user_id}/deviceTypes/4/data',
     'logout': 'https://account-us2.huami.com/v1/client/logout'
 }
 
@@ -40,6 +41,11 @@ PAYLOADS = {
     },
     'agps': {
         'apptoken': None
+    },
+    'data_short': {
+        'apptoken': None,
+        'startDay': None,
+        'endDay': None
     },
     'logout': {
         'login_token': None

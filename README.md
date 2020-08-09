@@ -18,6 +18,30 @@ Huami servers.
 3. Clone this repo:
 ```git clone https://github.com/argrento/huami-token.git```
 
+## Usage
+```
+usage: huami_token.py [-h] -m {amazfit,xiaomi} [-e EMAIL] [-p PASSWORD] [-b]
+                      [-g] [-a] [-n]
+
+Obtain Bluetooth Auth key from Amazfit servers and download AGPS data.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -m {amazfit,xiaomi}, --method {amazfit,xiaomi}
+                        Login method
+  -e EMAIL, --email EMAIL
+                        Account e-mail address
+  -p PASSWORD, --password PASSWORD
+                        Account Password
+  -b, --bt_keys         Get bluetooth tokens of paired devices
+  -g, --gps             Download A-GPS files
+  -a, --all             Do everything: get bluetooth tokens, download A-GPS
+                        files
+  -n, --no_logout       Do not logout, keep active session and display app
+                        token and access token
+```
+
+
 ## Logging in with Amazfit account
 Run script with your cridentials: `python huami_token.py --method amazfit --email youemail@example.com --password your_password --bt_keys`.
 

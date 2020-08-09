@@ -239,7 +239,7 @@ if __name__ == "__main__":
     console = Console()
     table = Table(show_header=True, header_style="bold", box=box.ASCII)
     table.add_column("MAC", style="dim", width=17, justify='center')
-    table.add_column("auth_key", width=36, justify='center')
+    table.add_column("auth_key", width=50, justify='center')
 
     device = HuamiAmazfit(method=args.method,
                           email=args.email,

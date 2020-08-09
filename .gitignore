@@ -3,3 +3,4 @@ notebooks
 .DS_Store
 *.zip
 __pycache__
+*.dump
