@@ -7,6 +7,7 @@ import shutil
 import urllib
 import argparse
 import requests
+import getpass
 
 from rich.console import Console
 from rich.table import Column, Table
@@ -240,6 +241,9 @@ if __name__ == "__main__":
     table = Table(show_header=True, header_style="bold", box=box.ASCII)
     table.add_column("MAC", style="dim", width=17, justify='center')
     table.add_column("auth_key", width=50, justify='center')
+
+    if args.password is None:
+        args.password = getpass.getpass()
 
     device = HuamiAmazfit(method=args.method,
                           email=args.email,
