@@ -17,6 +17,7 @@ with e-mail and password.
 Huami servers.
 3. Clone this repo:
 ```git clone https://github.com/argrento/huami-token.git```
+4. Install requirements: `pip install -r requirements.txt`
 
 ## Usage
 ```
