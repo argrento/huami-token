@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# pylint: disable=too-many-instance-attributes
+# pylint: disable=invalid-name
+
+"""Main module"""
 
 import json
 import uuid
@@ -6,17 +10,18 @@ import random
 import shutil
 import urllib
 import argparse
-import requests
 import getpass
+import requests
 
 from rich.console import Console
-from rich.table import Column, Table
+from rich.table import Table
 from rich import box
 
 import urls
 
 
 class HuamiAmazfit:
+    """Base class for logging in and receiving auth keys and GPS packs"""
     def __init__(self, method="amazfit", email=None, password=None):
 
         if method == 'amazfit' and (not email or not password):
@@ -38,7 +43,8 @@ class HuamiAmazfit:
                                                       random.randint(0, 255),
                                                       random.randint(0, 255))
 
-    def get_access_token(self):
+    def get_access_token(self) -> str:
+        """Get access token for log in"""
         print(f"Getting access token with {self.method} login method...")
 
         if self.method == 'xiaomi':
@@ -72,7 +78,8 @@ class HuamiAmazfit:
             redirect_url_parameters = urllib.parse.parse_qs(redirect_url.query)
 
             if 'error' in redirect_url_parameters:
-                raise ValueError(f"Wrong E-mail or Password. Error: {redirect_url_parameters['error']}")
+                raise ValueError(f"Wrong E-mail or Password." \
+                                 f"Error: {redirect_url_parameters['error']}")
 
             if 'access' not in redirect_url_parameters:
                 raise ValueError("No 'access' parameter in login url.")
@@ -86,7 +93,8 @@ class HuamiAmazfit:
         print("Token: {}".format(self.access_token))
         return self.access_token
 
-    def login(self, external_token=None):
+    def login(self, external_token=None) -> None:
+        """Perform login and get app and login tokens"""
         print("Logging in...")
         if external_token:
             self.access_token = external_token
@@ -109,22 +117,24 @@ class HuamiAmazfit:
 
         if 'token_info' not in login_result:
             raise ValueError("No 'token_info' parameter in login data.")
-        else:
-            token_info = login_result['token_info']
-            if 'app_token' not in token_info:
-                raise ValueError("No 'app_token' parameter in login data.")
-            self.app_token = token_info['app_token']
+        # else
+        # Do not need else, because raise breaks control flow
+        token_info = login_result['token_info']
+        if 'app_token' not in token_info:
+            raise ValueError("No 'app_token' parameter in login data.")
+        self.app_token = token_info['app_token']
 
-            if 'login_token' not in token_info:
-                raise ValueError("No 'login_token' parameter in login data.")
-            self.login_token = token_info['login_token']
+        if 'login_token' not in token_info:
+            raise ValueError("No 'login_token' parameter in login data.")
+        self.login_token = token_info['login_token']
 
-            if 'user_id' not in token_info:
-                raise ValueError("No 'user_id' parameter in login data.")
-            self.user_id = token_info['user_id']
+        if 'user_id' not in token_info:
+            raise ValueError("No 'user_id' parameter in login data.")
+        self.user_id = token_info['user_id']
         print("Logged in! User id: {}".format(self.user_id))
 
-    def get_wearable_auth_keys(self):
+    def get_wearable_auth_keys(self) -> dict:
+        """Request a list of linked devices"""
         print("Getting linked wearables...")
 
         devices_url = urls.URLS['devices'].format(user_id=urllib.parse.quote(self.user_id))
@@ -141,7 +151,7 @@ class HuamiAmazfit:
 
         devices_dict = {}
 
-        for idx, wearable in enumerate(devices):
+        for wearable in devices:
             if 'macAddress' not in wearable:
                 raise ValueError("No 'macAddress' parameter in device data.")
             mac_address = wearable['macAddress']
@@ -159,7 +169,8 @@ class HuamiAmazfit:
 
         return devices_dict
 
-    def get_gps_data(self):
+    def get_gps_data(self) -> None:
+        """Download GPS packs: almanac and AGPS"""
         agps_packs = ["AGPS_ALM", "AGPSZIP"]
         agps_file_names = ["cep_alm_pak.zip", "cep_7days.zip"]
         agps_link = urls.URLS['agps']
@@ -174,11 +185,12 @@ class HuamiAmazfit:
             agps_result = response.json()[0]
             if 'fileUrl' not in agps_result:
                 raise ValueError("No 'fileUrl' parameter in files request.")
-            with requests.get(agps_result['fileUrl'], stream=True) as r:
-                with open(agps_file_names[idx], 'wb') as f:
-                    shutil.copyfileobj(r.raw, f)
+            with requests.get(agps_result['fileUrl'], stream=True) as request:
+                with open(agps_file_names[idx], 'wb') as gps_file:
+                    shutil.copyfileobj(request.raw, gps_file)
 
-    def logout(self):
+    def logout(self) -> None:
+        """Log out from the current account"""
         logout_url = urls.URLS['logout']
 
         data = urls.PAYLOADS['logout']
@@ -233,7 +245,8 @@ if __name__ == "__main__":
                         "--no_logout",
                         required=False,
                         action='store_true',
-                        help="Do not logout, keep active session and display app token and access token")
+                        help="Do not logout, keep active session and "\
+                             "display app token and access token")
 
     args = parser.parse_args()
 

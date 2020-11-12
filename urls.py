@@ -1,7 +1,10 @@
+"""Module for storin urls and payloads fro different requests"""
+
 URLS = {
     'login_xiaomi': 'https://account.xiaomi.com/oauth2/authorize?skip_confirm=false&'
                     'client_id=2882303761517383915&pt=0&scope=1+6000+16001+20000&'
-                    'redirect_uri=https%3A%2F%2Fhm.xiaomi.com%2Fwatch.do&_locale=en_US&response_type=code',
+                    'redirect_uri=https%3A%2F%2Fhm.xiaomi.com%2Fwatch.do&'
+                    '_locale=en_US&response_type=code',
     'tokens_amazfit': 'https://api-user.huami.com/registrations/{user_email}/tokens',
     'login_amazfit': 'https://account.huami.com/v2/client/login',
     'devices': 'https://api-mifit-us2.huami.com/users/{user_id}/devices',
@@ -22,7 +25,8 @@ PAYLOADS = {
         'country_code': 'US'
     },
     'login_amazfit': {
-        'dn':                 'account.huami.com,api-user.huami.com,app-analytics.huami.com,api-watch.huami.com,'
+        'dn':                 'account.huami.com,api-user.huami.com,app-analytics.huami.com,'
+                              'api-watch.huami.com,'
                               'api-analytics.huami.com,api-mifit.huami.com',
         'app_version':        '4.3.0-play',
         'source':             'com.huami.watch.hmwatchmanager',
