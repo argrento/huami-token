@@ -242,7 +242,7 @@ if __name__ == "__main__":
     table.add_column("MAC", style="dim", width=17, justify='center')
     table.add_column("auth_key", width=50, justify='center')
 
-    if args.password is None:
+    if args.password is None and args.method == "amazfit":
         args.password = getpass.getpass()
 
     device = HuamiAmazfit(method=args.method,
