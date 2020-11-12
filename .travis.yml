@@ -5,11 +5,10 @@ python:
 # Install dependencies.
 install:
   - pip install -r requirements.txt
-  - pip install nose pylint
 
 # Run linting and tests.
 script:
-  - pylint ./huami-token.py
+  - pytest --pylint
 
 # Turn email notifications off.
 notifications:
