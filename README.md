@@ -1,4 +1,6 @@
-# Huami-token
+# Huami-token 
+
+[![Build Status](https://travis-ci.org/argrento/huami-token.svg?branch=master)](https://travis-ci.org/argrento/huami-token)
 
 Script to obtain watch or band bluetooth acess token from Huami servers. 
 It will also download AGPS data packs `cep_alm_pak.zip` and `cep_7days.zip`.
