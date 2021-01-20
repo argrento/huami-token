@@ -5,6 +5,10 @@
 Script to obtain watch or band bluetooth acess token from Huami servers. 
 It will also download AGPS data packs `cep_alm_pak.zip` and `cep_7days.zip`.
 
+### Important
+In insights/traffic I found that there was one hit from http://confluence.huami.com/pages/viewpage.action. 
+So probably in the nearest future this script can stop working.
+
 ## About
 
 To use new versions of Amazfit and Xiaomi watches and bands with Gadgetbridge you need special unique key. 
