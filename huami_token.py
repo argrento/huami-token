@@ -149,31 +149,36 @@ class HuamiAmazfit:
             raise ValueError("No 'items' parameter in devices data.")
         devices = device_request['items']
 
-        wearables = []
+        _wearables = []
 
-        for wearable in devices:
-            if 'macAddress' not in wearable:
+        for _wearable in devices:
+            if 'macAddress' not in _wearable:
                 raise ValueError("No 'macAddress' parameter in device data.")
-            mac_address = wearable['macAddress']
+            mac_address = _wearable['macAddress']
 
-            if 'additionalInfo' not in wearable:
+            if 'additionalInfo' not in _wearable:
                 raise ValueError("No 'additionalInfo' parameter in device data.")
-            device_info = json.loads(wearable['additionalInfo'])
+            device_info = json.loads(_wearable['additionalInfo'])
 
             if 'auth_key' not in device_info:
                 raise ValueError("No 'auth_key' parameter in device data.")
             key_str = device_info['auth_key']
             auth_key = '0x' + (key_str if key_str != '' else '00')
 
-            wearables.append(
+            if 'activeStatus' in _wearable:
+                active_status = str(_wearable['activeStatus'])
+            else:
+                active_status = '-1'
+
+            _wearables.append(
                 {
-                    'active_status': str(wearable['activeStatus']) if 'activeStatus' in wearable else '-1',
+                    'active_status': active_status,
                     'mac_address': mac_address,
                     'auth_key': auth_key
                 }
             )
 
-        return wearables
+        return _wearables
 
     def get_gps_data(self) -> None:
         """Download GPS packs: almanac and AGPS"""
