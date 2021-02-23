@@ -1,22 +1,22 @@
-# Huami-token 
+# Huami-token
 
 [![Build Status](https://travis-ci.org/argrento/huami-token.svg?branch=master)](https://travis-ci.org/argrento/huami-token)
 
-Script to obtain watch or band bluetooth acess token from Huami servers. 
+Script to obtain watch or band bluetooth access token from Huami servers.
 It will also download AGPS data packs `cep_alm_pak.zip` and `cep_7days.zip`.
 
 ### Important
-In insights/traffic I found that there was one hit from http://confluence.huami.com/pages/viewpage.action. 
+In insights/traffic I found that there was one hit from http://confluence.huami.com/pages/viewpage.action.
 So probably in the nearest future this script can stop working.
 
 ## About
 
-To use new versions of Amazfit and Xiaomi watches and bands with Gadgetbridge you need special unique key. 
+To use new versions of Amazfit and Xiaomi watches and bands with Gadgetbridge you need special unique key.
 Read more here: https://codeberg.org/Freeyourgadget/Gadgetbridge/wiki/Huami-Server-Pairing.
 
 ## Preparation
 
-1. Ensure that you login in Amazfit App with Amazfit or Xiaomi account -- 
+1. Ensure that you login in Amazfit App with Amazfit or Xiaomi account --
 because only this login methods are supported. If not, create new Amazfit account
 with e-mail and password.
 2. Pair, sync and update your watch with Amazfit App. Your pairing key will be stored on
@@ -50,7 +50,7 @@ optional arguments:
 
 
 ## Logging in with Amazfit account
-Run script with your cridentials: `python huami_token.py --method amazfit --email youemail@example.com --password your_password --bt_keys`.
+Run script with your credentials: `python huami_token.py --method amazfit --email youemail@example.com --password your_password --bt_keys`.
 
 Sample output:
 ```bash
@@ -70,15 +70,15 @@ Logged out.
 ```
 
 Here the `auth_key` is the unique pairing key for your watch.
-    
+
 ### Logging in with Xiaomi account
 This is a little bit harder to use, since you need to login manually on the Xiaomi web site.
 
 1. Run script `python huami_token.py --method xiaomi --bt_keys`.
 2. Script will ask you to open Xiaomi login web page. https://account.xiaomi.com/oauth2/authorize?skip_confirm=false&client_id=2882303761517383915&pt=0&scope=1+6000+16001+20000&redirect_uri=https%3A%2F%2Fhm.xiaomi.com%2Fwatch.do&_locale=en_US&response_type=code
 3. Login with your credentials there.
-4. If your login is successful, browser will show the error that connection is not secured. 
-On this stage address will look like this: `https://hm.xiaomi.com/watch.do?code=ALSG_CLOUDSRV_9B8D87D0EB77C71B45FF73B2266D922B`. 
+4. If your login is successful, browser will show the error that connection is not secured.
+On this stage address will look like this: `https://hm.xiaomi.com/watch.do?code=ALSG_CLOUDSRV_9B8D87D0EB77C71B45FF73B2266D922B`.
 5. Copy this address.
 6. Return to script, paste this address and press `enter`.
 
@@ -108,9 +108,9 @@ Getting linked wearables...
 Logged out.
 ```
 
-Here the `auth_key` is the unique pairing key for your watch. 
+Here the `auth_key` is the unique pairing key for your watch.
 
-_In this example I have two devices: the first one is my Amazfit Bip S watch, 
+_In this example I have two devices: the first one is my Amazfit Bip S watch,
 the second one is my Xiaomi Mi Smart Scale._
 
 
@@ -128,7 +128,7 @@ the second one is my Xiaomi Mi Smart Scale._
 
 ## Versioning
 
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/argrento/huami-token/tags). 
+We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/argrento/huami-token/tags).
 
 ## License
 
