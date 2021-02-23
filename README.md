@@ -45,7 +45,7 @@ optional arguments:
   -f, --firmware        Request firmware updates. Works only with -b/--bt_keys
                         argument. Extremely dangerous
   -a, --all             Do everything: get bluetooth tokens, download A-GPS
-                        files
+                        files. But do NOT download firmware updates
   -n, --no_logout       Do not logout, keep active session and display app
                         token and access token
 ```
@@ -124,10 +124,10 @@ I am not responsible for any of problems that might arise.
 
 Can be enabled with `-f/--firmware` argument. Will work only with `-b/--bt_keys` argument.
 You should input the ID of a device, or `-1` to check for all.
-
 Script will try to find updates for the firmware and the font pack for the device from 
 the table above.
 
+Use the downloaded files at your own risk!
 
 ## Dependencies
 

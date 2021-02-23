@@ -12,7 +12,6 @@ import urllib
 import argparse
 import getpass
 import requests
-import hashlib
 
 from rich.console import Console
 from rich.table import Table
@@ -186,7 +185,8 @@ class HuamiAmazfit:
 
         return _wearables
 
-    def get_firmware(self, _wearable: dict) -> None:
+    @staticmethod
+    def get_firmware(_wearable: dict) -> None:
         """Check and download updates for the furmware and fonts"""
         fw_url = urls.URLS["fw_updates"]
         params = urls.PAYLOADS["fw_updates"]
@@ -202,24 +202,20 @@ class HuamiAmazfit:
         response = requests.get(fw_url, params=params, headers=headers)
         response.raise_for_status()
         fw_response = response.json()
-
-        msgs = []
         links = []
         hashes = []
 
         if 'firmwareUrl' in fw_response:
-            msgs.append('firmware')
             links.append(fw_response['firmwareUrl'])
             hashes.append(fw_response['firmwareMd5'])
         if 'fontUrl' in fw_response:
-            msgs.append('font')
             links.append(fw_response['fontUrl'])
             hashes.append(fw_response['fontMd5'])
 
         if not links:
             print("No updates found!")
         else:
-            for msg, link, hash_sum in zip(msgs, links, hashes):
+            for link, hash_sum in zip(links, hashes):
                 file_name = link.split('/')[-1]
                 print(f"Downloading {file_name}...")
                 with requests.get(link, stream=True) as r:
@@ -235,7 +231,7 @@ class HuamiAmazfit:
         headers = urls.PAYLOADS['agps']
         headers['apptoken'] = self.app_token
 
-        for idx, agps_pack_name in enumerate(agps_packs):
+        for pack_idx, agps_pack_name in enumerate(agps_packs):
             print(f"Downloading {agps_pack_name}...")
             response = requests.get(agps_link.format(pack_name=agps_pack_name), headers=headers)
             response.raise_for_status()
@@ -243,7 +239,7 @@ class HuamiAmazfit:
             if 'fileUrl' not in agps_result:
                 raise ValueError("No 'fileUrl' parameter in files request.")
             with requests.get(agps_result['fileUrl'], stream=True) as request:
-                with open(agps_file_names[idx], 'wb') as gps_file:
+                with open(agps_file_names[pack_idx], 'wb') as gps_file:
                     shutil.copyfileobj(request.raw, gps_file)
 
     def logout(self) -> None:
