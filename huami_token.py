@@ -12,6 +12,7 @@ import urllib
 import argparse
 import getpass
 import requests
+import hashlib
 
 from rich.console import Console
 from rich.table import Table
@@ -171,20 +172,59 @@ class HuamiAmazfit:
             key_str = device_info['auth_key']
             auth_key = '0x' + (key_str if key_str != '' else '00')
 
-            if 'activeStatus' in _wearable:
-                active_status = str(_wearable['activeStatus'])
-            else:
-                active_status = '-1'
-
             _wearables.append(
                 {
-                    'active_status': active_status,
+                    'active_status': str(_wearable.get('activeStatus', '-1')),
                     'mac_address': mac_address,
-                    'auth_key': auth_key
+                    'auth_key': auth_key,
+                    'device_source': str(_wearable.get('deviceSource', 0)),
+                    'firmware_version': _wearable.get('firmwareVersion', 'v-1'),
+                    'hardware_version': device_info.get('hardwareVersion', 'v-1'),
+                    'production_source': device_info.get('productVersion', '0')
                 }
             )
 
         return _wearables
+
+    def get_firmware(self, _wearable: dict) -> None:
+        """Check and download updates for the furmware and fonts"""
+        fw_url = urls.URLS["fw_updates"]
+        params = urls.PAYLOADS["fw_updates"]
+        params['deviceSource'] = _wearable['device_source']
+        params['firmwareVersion'] = _wearable['firmware_version']
+        params['hardwareVersion'] = _wearable['hardware_version']
+        params['productionSource'] = _wearable['production_source']
+        headers = {
+           'appplatform': 'android_phone',
+            'appname': 'com.huami.midong',
+            'lang': 'en_US'
+        }
+        response = requests.get(fw_url, params=params, headers=headers)
+        response.raise_for_status()
+        fw_response = response.json()
+
+        msgs = []
+        links = []
+        hashes = []
+
+        if 'firmwareUrl' in fw_response:
+            msgs.append('firmware')
+            links.append(fw_response['firmwareUrl'])
+            hashes.append(fw_response['firmwareMd5'])
+        if 'fontUrl' in fw_response:
+            msgs.append('font')
+            links.append(fw_response['fontUrl'])
+            hashes.append(fw_response['fontMd5'])
+
+        if not links:
+            print("No updates found!")
+        else:
+            for msg, link, hash_sum in zip(msgs, links, hashes):
+                file_name = link.split('/')[-1]
+                print(f"Downloading {file_name}...")
+                with requests.get(link, stream=True) as r:
+                    with open(file_name, 'wb') as f:
+                        shutil.copyfileobj(r.raw, f)
 
     def get_gps_data(self) -> None:
         """Download GPS packs: almanac and AGPS"""
@@ -196,7 +236,7 @@ class HuamiAmazfit:
         headers['apptoken'] = self.app_token
 
         for idx, agps_pack_name in enumerate(agps_packs):
-            print("Downloading {}...".format(agps_pack_name))
+            print(f"Downloading {agps_pack_name}...")
             response = requests.get(agps_link.format(pack_name=agps_pack_name), headers=headers)
             response.raise_for_status()
             agps_result = response.json()[0]
@@ -252,11 +292,20 @@ if __name__ == "__main__":
                         required=False,
                         action='store_true',
                         help="Download A-GPS files")
+
+    parser.add_argument("-f",
+                        "--firmware",
+                        required=False,
+                        action='store_true',
+                        help='Request firmware updates. Works only with -b/--bt_keys argument. '
+                             'Extremely dangerous!')
+
     parser.add_argument("-a",
                         "--all",
                         required=False,
                         action='store_true',
-                        help="Do everything: get bluetooth tokens, download A-GPS files")
+                        help="Do everything: get bluetooth tokens, download A-GPS files. But "
+                             "do NOT download firmware updates")
 
     parser.add_argument("-n",
                         "--no_logout",
@@ -269,9 +318,13 @@ if __name__ == "__main__":
 
     console = Console()
     table = Table(show_header=True, header_style="bold", box=box.ASCII)
+    table.add_column("ID", width=3, justify='center')
     table.add_column("ACT", width=3, justify='center')
     table.add_column("MAC", style="dim", width=17, justify='center')
-    table.add_column("auth_key", width=50, justify='center')
+    table.add_column("auth_key", width=45, justify='center')
+
+    if args.firmware and not args.bt_keys:
+        parser.error("Can not use -f/--firmware without -b/--bt_keys!")
 
     if args.password is None and args.method == "amazfit":
         args.password = getpass.getpass()
@@ -282,11 +335,30 @@ if __name__ == "__main__":
     device.get_access_token()
     device.login()
 
+    wearables = []
     if args.bt_keys or args.all:
         wearables = device.get_wearables()
-        for wearable in wearables:
-            table.add_row(wearable['active_status'], wearable['mac_address'], wearable['auth_key'])
+        for idx, wearable in enumerate(wearables):
+            table.add_row(str(idx), wearable['active_status'],
+                          wearable['mac_address'], wearable['auth_key'])
         console.print(table)
+
+    if args.firmware:
+        print("Downloading the firmware is untested and can brick your device. "
+              "I am not responsible for any problems that might arise.")
+        answer = input("Do you want to proceed? [yes/no] ")
+        if answer.lower() in ['yes', 'y', 'ye']:
+            wearable_id = input("ID of the device to check for updates (-1 for all of them): ")
+            if wearable_id == "-1":
+                print("Be extremely careful with downloaded files!")
+                for idx, wearable in enumerate(wearables):
+                    print(f"\nChecking for device {idx}...")
+                    device.get_firmware(wearable)
+            elif int(wearable_id) in range(0, len(wearables)):
+                device.get_firmware(wearables[wearable_id])
+            else:
+                print("Wrong input!")
+
 
     if args.gps or args.all:
         device.get_gps_data()

@@ -42,6 +42,8 @@ optional arguments:
                         Account Password
   -b, --bt_keys         Get bluetooth tokens of paired devices
   -g, --gps             Download A-GPS files
+  -f, --firmware        Request firmware updates. Works only with -b/--bt_keys
+                        argument. Extremely dangerous
   -a, --all             Do everything: get bluetooth tokens, download A-GPS
                         files
   -n, --no_logout       Do not logout, keep active session and display app
@@ -60,11 +62,11 @@ Token: ['UaFHW53RJVYwqXaa7ncPQ']
 Logging in...
 Logged in! User id: 1234567890
 Getting linked wearables...
-+----------------------------------------------------------------+
-| ACT |        MAC        |               auth_key               |
-|-----+-------------------+--------------------------------------|
-|  1  | AB:CD:EF:12:34:56 |   0xa3c10e34e5c14637eea6b9efc06106   |
-+----------------------------------------------------------------+
++----------------------------------------------------------------------+
+| ID  | ACT |        MAC        |               auth_key               |
+|-----+-----+-------------------+--------------------------------------|
+|  0  |  1  | AB:CD:EF:12:34:56 |   0xa3c10e34e5c14637eea6b9efc06106   |
++----------------------------------------------------------------------+
 
 Logged out.
 ```
@@ -99,12 +101,12 @@ Token: ['ALSG_CLOUDSRV_9B8D87D0EB77C71B45FF73B2266D922B']
 Logging in...
 Logged in! User id: 3000654321
 Getting linked wearables...
-+----------------------------------------------------------------+
-| ACT |        MAC        |               auth_key               |
-|-----+-------------------+--------------------------------------|
-|  1  | 12:34:56:AB:CD:EF |   0x3c10e34e5c1463527579996fa83e6d   |
-|  0  | BA:DC:FE:21:43:65 |                 0x00                 |
-+----------------------------------------------------------------+
++----------------------------------------------------------------------+
+| ID  | ACT |        MAC        |               auth_key               |
+|-----+-----+-------------------+--------------------------------------|
+|  0  |  1  | 12:34:56:AB:CD:EF |   0x3c10e34e5c1463527579996fa83e6d   |
+|  1  |  0  | BA:DC:FE:21:43:65 |                 0x00                 |
++----------------------------------------------------------------------+
 
 Logged out.
 ```
@@ -114,6 +116,17 @@ active or not.
 
 In this example I have two devices: the first one is my Amazfit Bip S watch,
 the second one is my Xiaomi Mi Smart Scale.
+
+## Experimental: updates download
+
+This is extremely dangerous: flashing the wrong version can brick your device!
+I am not responsible for any of problems that might arise.
+
+Can be enabled with `-f/--firmware` argument. Will work only with `-b/--bt_keys` argument.
+You should input the ID of a device, or `-1` to check for all.
+
+Script will try to find updates for the firmware and the font pack for the device from 
+the table above.
 
 
 ## Dependencies

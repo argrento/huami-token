@@ -11,6 +11,7 @@ URLS = {
     'agps': 'https://api-mifit-us2.huami.com/apps/com.huami.midong/fileTypes/{pack_name}/files',
     'data_short': 'https://api-mifit-us2.huami.com/users/{user_id}/deviceTypes/4/data',
     'logout': 'https://account-us2.huami.com/v1/client/logout',
+    'fw_updates': 'https://api-mifit-us2.huami.com/devices/ALL/hasNewVersion'
 }
 
 PAYLOADS = {
@@ -55,4 +56,14 @@ PAYLOADS = {
     'logout': {
         'login_token': None
     },
+    'fw_updates': {
+        'productionSource': None,
+        'deviceSource': None,
+        'fontVersion': '0',
+        'fontFlag': '0',
+        'appVersion': '5.9.2-play_100355',
+        'firmwareVersion': None,
+        'hardwareVersion': None,
+        'support8Bytes': 'true'
+    }
 }

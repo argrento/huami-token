@@ -4,3 +4,5 @@ notebooks
 *.zip
 __pycache__
 *.dump
+*.fw
+*.bin
