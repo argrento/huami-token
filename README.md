@@ -69,7 +69,7 @@ Getting linked wearables...
 Logged out.
 ```
 
-Here the `auth_key` is the unique pairing key for your watch. The `ACT` tab shows whether device is
+Here the `auth_key` is the unique pairing key for your watch. The `ACT` tab shows whether a device is
 active or not.
 
 ### Logging in with Xiaomi account
@@ -109,7 +109,7 @@ Getting linked wearables...
 Logged out.
 ```
 
-Here the `auth_key` is the unique pairing key for your watch. The `ACT` tab shows whether device is
+Here the `auth_key` is the unique pairing key for your watch. The `ACT` tab shows whether a device is
 active or not.
 
 In this example I have two devices: the first one is my Amazfit Bip S watch,
