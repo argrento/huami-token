@@ -217,7 +217,7 @@ class HuamiAmazfit:
         else:
             for link, hash_sum in zip(links, hashes):
                 file_name = link.split('/')[-1]
-                print(f"Downloading {file_name}...")
+                print(f"Downloading {file_name} with MD5-hash {hash_sum}...")
                 with requests.get(link, stream=True) as r:
                     with open(file_name, 'wb') as f:
                         shutil.copyfileobj(r.raw, f)
