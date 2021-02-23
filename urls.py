@@ -10,7 +10,7 @@ URLS = {
     'devices': 'https://api-mifit-us2.huami.com/users/{user_id}/devices',
     'agps': 'https://api-mifit-us2.huami.com/apps/com.huami.midong/fileTypes/{pack_name}/files',
     'data_short': 'https://api-mifit-us2.huami.com/users/{user_id}/deviceTypes/4/data',
-    'logout': 'https://account-us2.huami.com/v1/client/logout'
+    'logout': 'https://account-us2.huami.com/v1/client/logout',
 }
 
 PAYLOADS = {
@@ -28,7 +28,7 @@ PAYLOADS = {
         'dn':                 'account.huami.com,api-user.huami.com,app-analytics.huami.com,'
                               'api-watch.huami.com,'
                               'api-analytics.huami.com,api-mifit.huami.com',
-        'app_version':        '4.3.0-play',
+        'app_version':        '5.9.2-play_100355',
         'source':             'com.huami.watch.hmwatchmanager',
         'country_code':       None,
         'device_id':          None,
@@ -41,7 +41,8 @@ PAYLOADS = {
         'grant_type':         None
     },
     'devices': {
-        'apptoken': None
+        'apptoken': None,
+        # 'enableMultiDevice': 'true'
     },
     'agps': {
         'apptoken': None

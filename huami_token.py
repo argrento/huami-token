@@ -19,7 +19,6 @@ from rich import box
 
 import urls
 
-
 class HuamiAmazfit:
     """Base class for logging in and receiving auth keys and GPS packs"""
     def __init__(self, method="amazfit", email=None, password=None):
@@ -133,7 +132,7 @@ class HuamiAmazfit:
         self.user_id = token_info['user_id']
         print("Logged in! User id: {}".format(self.user_id))
 
-    def get_wearable_auth_keys(self) -> dict:
+    def get_wearables(self) -> dict:
         """Request a list of linked devices"""
         print("Getting linked wearables...")
 
@@ -141,15 +140,16 @@ class HuamiAmazfit:
 
         headers = urls.PAYLOADS['devices']
         headers['apptoken'] = self.app_token
+        params = {'enableMultiDevice': 'true'}
 
-        response = requests.get(devices_url, headers=headers)
+        response = requests.get(devices_url, params=params, headers=headers)
         response.raise_for_status()
         device_request = response.json()
         if 'items' not in device_request:
             raise ValueError("No 'items' parameter in devices data.")
         devices = device_request['items']
 
-        devices_dict = {}
+        wearables = []
 
         for wearable in devices:
             if 'macAddress' not in wearable:
@@ -165,9 +165,15 @@ class HuamiAmazfit:
             key_str = device_info['auth_key']
             auth_key = '0x' + (key_str if key_str != '' else '00')
 
-            devices_dict[f'{mac_address}'] = auth_key
+            wearables.append(
+                {
+                    'active_status': str(wearable['activeStatus']) if 'activeStatus' in wearable else '-1',
+                    'mac_address': mac_address,
+                    'auth_key': auth_key
+                }
+            )
 
-        return devices_dict
+        return wearables
 
     def get_gps_data(self) -> None:
         """Download GPS packs: almanac and AGPS"""
@@ -252,6 +258,7 @@ if __name__ == "__main__":
 
     console = Console()
     table = Table(show_header=True, header_style="bold", box=box.ASCII)
+    table.add_column("ACT", width=3, justify='center')
     table.add_column("MAC", style="dim", width=17, justify='center')
     table.add_column("auth_key", width=50, justify='center')
 
@@ -265,9 +272,9 @@ if __name__ == "__main__":
     device.login()
 
     if args.bt_keys or args.all:
-        device_keys = device.get_wearable_auth_keys()
-        for device_key in device_keys:
-            table.add_row(device_key, device_keys[device_key])
+        wearables = device.get_wearables()
+        for wearable in wearables:
+            table.add_row(wearable['active_status'], wearable['mac_address'], wearable['auth_key'])
         console.print(table)
 
     if args.gps or args.all:
