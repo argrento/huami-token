@@ -60,16 +60,17 @@ Token: ['UaFHW53RJVYwqXaa7ncPQ']
 Logging in...
 Logged in! User id: 1234567890
 Getting linked wearables...
-+----------------------------------------------------------+
-|        MAC        |               auth_key               |
-|-------------------+--------------------------------------|
-| AB:CD:EF:12:34:56 |   0xa3c10e34e5c14637eea6b9efc06106   |
-+----------------------------------------------------------+
++----------------------------------------------------------------+
+| ACT |        MAC        |               auth_key               |
+|-----+-------------------+--------------------------------------|
+|  1  | AB:CD:EF:12:34:56 |   0xa3c10e34e5c14637eea6b9efc06106   |
++----------------------------------------------------------------+
 
 Logged out.
 ```
 
-Here the `auth_key` is the unique pairing key for your watch.
+Here the `auth_key` is the unique pairing key for your watch. The `ACT` tab shows whether device is
+active or not.
 
 ### Logging in with Xiaomi account
 This is a little bit harder to use, since you need to login manually on the Xiaomi web site.
@@ -98,20 +99,21 @@ Token: ['ALSG_CLOUDSRV_9B8D87D0EB77C71B45FF73B2266D922B']
 Logging in...
 Logged in! User id: 3000654321
 Getting linked wearables...
-+----------------------------------------------------------+
-|        MAC        |               auth_key               |
-|-------------------+--------------------------------------|
-| 12:34:56:AB:CD:EF |   0x3c10e34e5c1463527579996fa83e6d   |
-| BA:DC:FE:21:43:65 |                 0x00                 |
-+----------------------------------------------------------+
++----------------------------------------------------------------+
+| ACT |        MAC        |               auth_key               |
+|-----+-------------------+--------------------------------------|
+|  1  | 12:34:56:AB:CD:EF |   0x3c10e34e5c1463527579996fa83e6d   |
+|  0  | BA:DC:FE:21:43:65 |                 0x00                 |
++----------------------------------------------------------------+
 
 Logged out.
 ```
 
-Here the `auth_key` is the unique pairing key for your watch.
+Here the `auth_key` is the unique pairing key for your watch. The `ACT` tab shows whether device is
+active or not.
 
-_In this example I have two devices: the first one is my Amazfit Bip S watch,
-the second one is my Xiaomi Mi Smart Scale._
+In this example I have two devices: the first one is my Amazfit Bip S watch,
+the second one is my Xiaomi Mi Smart Scale.
 
 
 ## Dependencies
