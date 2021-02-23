@@ -84,10 +84,16 @@ class HuamiAmazfit:
                 raise ValueError("No 'access' parameter in login url.")
 
             if 'country_code' not in redirect_url_parameters:
-                raise ValueError("No 'country_code' parameter in login url.")
+                # Sometimes for no reason server does not return country_code
+                # In this case we extract country_code from region, because it looks
+                # like this: 'eu-central-1'
+                region = redirect_url_parameters['region'][0]
+                self.country_code = region[0:2].upper()
+
+            else:
+                self.country_code = redirect_url_parameters['country_code']
 
             self.access_token = redirect_url_parameters['access']
-            self.country_code = redirect_url_parameters['country_code']
 
         print("Token: {}".format(self.access_token))
         return self.access_token
