@@ -351,7 +351,7 @@ if __name__ == "__main__":
                     print(f"\nChecking for device {idx}...")
                     device.get_firmware(wearable)
             elif int(wearable_id) in range(0, len(wearables)):
-                device.get_firmware(wearables[wearable_id])
+                device.get_firmware(wearables[int(wearable_id)])
             else:
                 print("Wrong input!")
 
