@@ -23,7 +23,7 @@ with e-mail and password.
 Huami servers.
 3. Clone this repo:
 ```git clone https://github.com/argrento/huami-token.git```
-4. Install requirements: `pip install -r requirements.txt`
+4. Install requirements: `pip3 install -r requirements.txt`
 
 ## Usage
 ```
@@ -56,7 +56,7 @@ Run script with your credentials: `python huami_token.py --method amazfit --emai
 
 Sample output:
 ```bash
-> python huami_token.py --method amazfit --email my_email --password password --bt_keys
+> python3 huami_token.py --method amazfit --email my_email --password password --bt_keys
 Getting access token with amazfit login method...
 Token: ['UaFHW53RJVYwqXaa7ncPQ']
 Logging in...
@@ -87,7 +87,7 @@ On this stage address will look like this: `https://hm.xiaomi.com/watch.do?code=
 
 Sample output:
 ```bash
-> python huami_token.py --method xiaomi --bt_keys
+> python3 huami_token.py --method xiaomi --bt_keys
 Getting access token with xiaomi login method...
 Copy this URL to web-browser
 
