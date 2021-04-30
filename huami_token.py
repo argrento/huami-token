@@ -224,8 +224,8 @@ class HuamiAmazfit:
 
     def get_gps_data(self) -> None:
         """Download GPS packs: almanac and AGPS"""
-        agps_packs = ["AGPS_ALM", "AGPSZIP"]
-        agps_file_names = ["cep_alm_pak.zip", "cep_7days.zip"]
+        agps_packs = ["AGPS_ALM", "AGPSZIP", "LLE", "AGPS"]
+        agps_file_names = ["cep_1week.zip", "cep_7days.zip", "lle_1week.zip", "cep_pak.bin"]
         agps_link = urls.URLS['agps']
 
         headers = urls.PAYLOADS['agps']
