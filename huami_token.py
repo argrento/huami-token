@@ -24,20 +24,21 @@
 
 """Main module"""
 
+import argparse
+import getpass
 import json
-import uuid
 import random
 import shutil
 import urllib
-import argparse
-import getpass
-import requests
+import uuid
 
+import requests
+from rich import box
 from rich.console import Console
 from rich.table import Table
-from rich import box
 
 import urls
+
 
 class HuamiAmazfit:
     """Base class for logging in and receiving auth keys and GPS packs"""
@@ -186,9 +187,7 @@ class HuamiAmazfit:
                 raise ValueError("No 'additionalInfo' parameter in device data.")
             device_info = json.loads(_wearable['additionalInfo'])
 
-            if 'auth_key' not in device_info:
-                raise ValueError("No 'auth_key' parameter in device data.")
-            key_str = device_info['auth_key']
+            key_str = device_info.get('auth_key', '')
             auth_key = '0x' + (key_str if key_str != '' else '00')
 
             _wearables.append(
