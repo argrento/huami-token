@@ -5,10 +5,6 @@
 Script to obtain watch or band bluetooth access token from Huami servers.
 It will also download AGPS data packs `cep_alm_pak.zip` and `cep_7days.zip`.
 
-### Important
-In insights/traffic I found that there was one hit from http://confluence.huami.com/pages/viewpage.action.
-So probably in the nearest future this script can stop working.
-
 ## About
 
 To use new versions of Amazfit and Xiaomi watches and bands with Gadgetbridge you need special unique key.
@@ -52,7 +48,7 @@ optional arguments:
 
 
 ## Logging in with Amazfit account
-Run script with your credentials: `python huami_token.py --method amazfit --email youemail@example.com --password your_password --bt_keys`.
+Run script with your credentials: `python3 huami_token.py --method amazfit --email youemail@example.com --password your_password --bt_keys`.
 
 Sample output:
 ```bash
@@ -77,7 +73,7 @@ active or not.
 ### Logging in with Xiaomi account
 This is a little bit harder to use, since you need to login manually on the Xiaomi web site.
 
-1. Run script `python huami_token.py --method xiaomi --bt_keys`.
+1. Run script `python3 huami_token.py --method xiaomi --bt_keys`.
 2. Script will ask you to open Xiaomi login web page. https://account.xiaomi.com/oauth2/authorize?skip_confirm=false&client_id=2882303761517383915&pt=0&scope=1+6000+16001+20000&redirect_uri=https%3A%2F%2Fhm.xiaomi.com%2Fwatch.do&_locale=en_US&response_type=code
 3. Login with your credentials there.
 4. If your login is successful, browser will show the error that connection is not secured.
