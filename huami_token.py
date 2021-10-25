@@ -38,7 +38,7 @@ from rich.console import Console
 from rich.table import Table
 
 import urls
-
+import errors
 
 class HuamiAmazfit:
     """Base class for logging in and receiving auth keys and GPS packs"""
@@ -139,7 +139,9 @@ class HuamiAmazfit:
         login_result = response.json()
 
         if 'error_code' in login_result:
-            raise ValueError(f"Login error. Error: {login_result['error_code']}")
+            error_code = login_result['error_code']
+            error_message = errors.ERRORS.get(error_code, error_code)
+            raise ValueError(f"Login error. Error: {error_message}")
 
         if 'token_info' not in login_result:
             raise ValueError("No 'token_info' parameter in login data.")
