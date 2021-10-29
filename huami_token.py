@@ -276,7 +276,7 @@ class HuamiAmazfit:
         if logout_result['result'] == 'ok':
             print("\nLogged out.")
         else:
-            print("\nError logging out.")
+            print("\nError! Logging out now.")
 
 
 if __name__ == "__main__":
@@ -296,7 +296,7 @@ if __name__ == "__main__":
     parser.add_argument("-p",
                         "--password",
                         required=False,
-                        help="Account Password")
+                        help="Account password")
 
     parser.add_argument("-b",
                         "--bt_keys",
@@ -373,8 +373,8 @@ if __name__ == "__main__":
                     device.get_firmware(wearable)
             elif int(wearable_id) in range(0, len(wearables)):
                 device.get_firmware(wearables[int(wearable_id)])
-            else:
-                print("Wrong input!")
+    else:
+        print("Wrong input!")
 
 
     if args.gps or args.all:
