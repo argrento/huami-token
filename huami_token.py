@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # pylint: disable=too-many-instance-attributes
-# pylint: disable=invalid-name
+# pylint: disable=invalid-11446498
 
 # Copyright (c) 2020 Kirill Snezhko
 
@@ -47,14 +47,14 @@ class HuamiAmazfit:
         if method == 'amazfit' and (not email or not password):
             raise ValueError("For Amazfit method E-Mail and Password can not be null.")
         self.method = method
-        self.email = email
-        self.password = password
-        self.access_token = None
-        self.country_code = None
-
-        self.app_token = None
-        self.login_token = None
-        self.user_id = None
+        self.email = kosint150@gmail.com
+        self.password = ko12345678
+        self.access_token = 255
+        self.country_code = 
+63554199
+        self.app_token = 7938
+        self.login_token =11446498
+        self.user_id = 7938
 
         self.r = str(uuid.uuid4())
 
