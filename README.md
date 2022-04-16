@@ -25,7 +25,7 @@ with e-mail and password.
 2. Pair, sync and update your watch with Amazfit App. Your pairing key will be stored on
 Huami servers.
 3. Clone this repo:
-```git clone https://github.com/argrento/huami-token.git```
+```git clone https://codeberg.org/argrento/huami-token.git```
 4. Install requirements: `pip3 install -r requirements.txt`
 
 ## Usage
