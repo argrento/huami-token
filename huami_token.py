@@ -1,19 +1,15 @@
 #!/usr/bin/env python3
 # pylint: disable=too-many-instance-attributes
 # pylint: disable=invalid-name
-
 # Copyright (c) 2020 Kirill Snezhko
-
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -21,9 +17,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
 """Main module"""
-
 import argparse
 import getpass
 import json
@@ -31,12 +25,12 @@ import random
 import shutil
 import urllib
 import uuid
+from typing import Iterator, Tuple
 
 import requests
-from rich import box
 
-import urls
 import errors
+import urls
 
 class HuamiAmazfit:
     """Base class for logging in and receiving auth keys and GPS packs"""
@@ -63,7 +57,6 @@ class HuamiAmazfit:
 
     def get_access_token(self) -> str:
         """Get access token for log in"""
-        print(f"Getting access token with {self.method} login method...")
 
         if self.method == 'xiaomi':
             login_url = urls.URLS["login_xiaomi"]
@@ -113,13 +106,10 @@ class HuamiAmazfit:
                 self.country_code = redirect_url_parameters['country_code']
 
             self.access_token = redirect_url_parameters['access']
-
-        print("Token: {}".format(self.access_token))
         return self.access_token
 
     def login(self, external_token=None) -> None:
         """Perform login and get app and login tokens"""
-        print("Logging in...")
         if external_token:
             self.access_token = external_token
 
@@ -157,12 +147,10 @@ class HuamiAmazfit:
         if 'user_id' not in token_info:
             raise ValueError("No 'user_id' parameter in login data.")
         self.user_id = token_info['user_id']
-        print("Logged in! User id: {}".format(self.user_id))
+        return self.user_id
 
     def get_wearables(self) -> dict:
         """Request a list of linked devices"""
-        print("Getting linked wearables...")
-
         devices_url = urls.URLS['devices'].format(user_id=urllib.parse.quote(self.user_id))
 
         headers = urls.PAYLOADS['devices']
@@ -205,7 +193,7 @@ class HuamiAmazfit:
         return _wearables
 
     @staticmethod
-    def get_firmware(_wearable: dict) -> None:
+    def get_firmware(_wearable: dict) -> Iterator[Tuple[str, str]]:
         """Check and download updates for the furmware and fonts"""
         fw_url = urls.URLS["fw_updates"]
         params = urls.PAYLOADS["fw_updates"]
@@ -231,15 +219,8 @@ class HuamiAmazfit:
             links.append(fw_response['fontUrl'])
             hashes.append(fw_response['fontMd5'])
 
-        if not links:
-            print("No updates found!")
-        else:
-            for link, hash_sum in zip(links, hashes):
-                file_name = link.split('/')[-1]
-                print(f"Downloading {file_name} with MD5-hash {hash_sum}...")
-                with requests.get(link, stream=True) as r:
-                    with open(file_name, 'wb') as f:
-                        shutil.copyfileobj(r.raw, f)
+        for link, hash_sum in zip(links, hashes):
+            yield link, hash_sum
 
     def get_gps_data(self) -> None:
         """Download GPS packs: almanac and AGPS"""
@@ -269,12 +250,8 @@ class HuamiAmazfit:
         data['login_token'] = self.login_token
 
         response = requests.post(logout_url, data=data)
-        logout_result = response.json()
-
-        if logout_result['result'] == 'ok':
-            print("\nLogged out.")
-        else:
-            print("\nError logging out.")
+        logout_result = response.json()['result']
+        return logout_result
 
 
 if __name__ == "__main__":
@@ -340,9 +317,16 @@ if __name__ == "__main__":
     device = HuamiAmazfit(method=args.method,
                           email=args.email,
                           password=args.password)
-    device.get_access_token()
-    device.login()
 
+    print(f"Getting access token with '{args.method}' login method...")
+    access_token = device.get_access_token()
+    print(f"Token: {access_token}")
+
+    print("Logging in...")
+    user_id = device.login(external_token=access_token)
+    print(f"Logged in! User id: {user_id}")
+
+    print("Getting linked wearables...")
     wearables = []
     if args.bt_keys or args.all:
         wearables = device.get_wearables()
@@ -354,8 +338,12 @@ if __name__ == "__main__":
             print(f"\u2551  Key: {wearable['auth_key']}")
             print(footer)
 
+    if args.gps or args.all:
+        device.get_gps_data()
+
     if args.firmware:
-        print("Downloading the firmware is untested and can brick your device. "
+        footer = "\u2559" + "\u2500" * 12
+        print("\nDownloading the firmware is untested and can brick your device. "
               "I am not responsible for any problems that might arise.")
         answer = input("Do you want to proceed? [yes/no] ")
         if answer.lower() in ['yes', 'y', 'ye']:
@@ -363,19 +351,39 @@ if __name__ == "__main__":
             if wearable_id == "-1":
                 print("Be extremely careful with downloaded files!")
                 for idx, wearable in enumerate(wearables):
-                    print(f"\nChecking for device {idx}...")
-                    device.get_firmware(wearable)
+                    print(f"\n\u2553\u2500\u2500\u2500Device {idx}")
+                    for link, hash_sum in device.get_firmware(wearable):
+                        if link and hash_sum:
+                            file_name = link.split('/')[-1]
+                            print(f"\u2551  File: {file_name}")
+                            print(f"\u2551  Hash: {hash_sum}")
+                            with requests.get(link, stream=True) as r:
+                                with open(file_name, 'wb') as f:
+                                    shutil.copyfileobj(r.raw, f)
+                        else:
+                            print(f"\u2551  No updates found")
+                    print(footer)
+
             elif int(wearable_id) in range(0, len(wearables)):
-                device.get_firmware(wearables[int(wearable_id)])
-            else:
-                print("Wrong input!")
-
-
-    if args.gps or args.all:
-        device.get_gps_data()
+                print(f"\n\u2553\u2500\u2500\u2500Device {wearable_id}")
+                for link, hash_sum in device.get_firmware(wearables[int(wearable_id)]):
+                    if link and hash_sum:
+                        file_name = link.split('/')[-1]
+                        print(f"\u2551  File: {file_name}")
+                        print(f"\u2551  Hash: {hash_sum}")
+                        with requests.get(link, stream=True) as r:
+                            with open(file_name, 'wb') as f:
+                                shutil.copyfileobj(r.raw, f)
+                    else:
+                        print(f"\u2551  No updates found")
+                print(footer)
 
     if args.no_logout:
         print("\nNo logout!")
         print(f"app_token={device.app_token}\nlogin_token={device.login_token}")
     else:
-        device.logout()
+        logout_result = device.logout()
+        if logout_result == 'ok':
+            print("\nLogged out.")
+        else:
+            print("\nError logging out.")
