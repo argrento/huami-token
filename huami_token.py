@@ -34,8 +34,6 @@ import uuid
 
 import requests
 from rich import box
-from rich.console import Console
-from rich.table import Table
 
 import urls
 import errors
@@ -333,13 +331,6 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    console = Console()
-    table = Table(show_header=True, header_style="bold", box=box.ASCII)
-    table.add_column("ID", width=3, justify='center')
-    table.add_column("ACT", width=3, justify='center')
-    table.add_column("MAC", style="dim", width=17, justify='center')
-    table.add_column("auth_key", width=45, justify='center')
-
     if args.firmware and not args.bt_keys:
         parser.error("Can not use -f/--firmware without -b/--bt_keys!")
 
@@ -355,10 +346,13 @@ if __name__ == "__main__":
     wearables = []
     if args.bt_keys or args.all:
         wearables = device.get_wearables()
+        footer = "\u2559" + "\u2500" * 12
         for idx, wearable in enumerate(wearables):
-            table.add_row(str(idx), wearable['active_status'],
-                          wearable['mac_address'], wearable['auth_key'])
-        console.print(table)
+            print(f"\n\u2553\u2500\u2500\u2500Device {idx}")
+            is_active = "Yes" if wearable['active_status'] == '1' else "No"
+            print(f"\u2551  MAC: {wearable['mac_address']}, active: {is_active}")
+            print(f"\u2551  Key: {wearable['auth_key']}")
+            print(footer)
 
     if args.firmware:
         print("Downloading the firmware is untested and can brick your device. "
