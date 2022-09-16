@@ -1,6 +1,6 @@
-Huami-token is now hosted on [codeberg.org](https://codeberg.org/argrento/huami_token/).
+Huami-token is now hosted on [codeberg.org](https://codeberg.org/argrento/huami-token/).
 
-<a href="https://codeberg.org/argrento/huami_token/">
+<a href="https://codeberg.org/argrento/huami-token/">
     <img alt="Get it on Codeberg" src="https://get-it-on.codeberg.org/get-it-on-white-on-black.png" height="60">
 </a>
 
