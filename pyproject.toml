@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "huami-token"
+version = "0.6.0"
+description = "Script to obtain watch or band bluetooth access token from Huami servers. It will also download AGPS data packs cep_alm_pak.zip and cep_7days.zip."
+authors = ["Kirill Snezhko <kirill.snezhko@pm.me>"]
+license = "MIT"
+readme = "README.md"
+packages = [{include = "huami_token"}]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+requests = "^2.28.1"
+pytest-pylint = "0.18.0"
+pytest-flake8 = "1.0.6"
+
+[tool.poetry.scripts]
+huami_token = "huami_token.huami_token:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
