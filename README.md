@@ -146,7 +146,6 @@ Use the downloaded files at your own risk!
 * uuid
 * json
 * shutil
-* rich
 
 ## License
 
