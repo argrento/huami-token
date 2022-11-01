@@ -40,6 +40,8 @@ from rich.table import Table
 import urls
 import errors
 
+import json
+
 class HuamiAmazfit:
     """Base class for logging in and receiving auth keys and GPS packs"""
     def __init__(self, method="amazfit", email=None, password=None):
@@ -280,13 +282,27 @@ class HuamiAmazfit:
 
 
 if __name__ == "__main__":
+
+    no_logout = None
+    login_method = None
+    login_method_required = True
+    config = {}
+    try:
+        config_file = open("config.json",'r')
+        config = json.load(config_file)
+        config_file.close()
+        login_method_required=False
+    except Exception as e:
+        print ("except",e)
+        login_method_required=True
+
     parser = argparse.ArgumentParser(description="Obtain Bluetooth Auth key from Amazfit "
                                                  "servers and download AGPS data.")
     parser.add_argument("-m",
                         "--method",
                         choices=["amazfit", "xiaomi"],
                         default="amazfit",
-                        required=True,
+                        required=login_method_required,
                         help="Login method ")
     parser.add_argument("-e",
                         "--email",
@@ -343,14 +359,34 @@ if __name__ == "__main__":
     if args.firmware and not args.bt_keys:
         parser.error("Can not use -f/--firmware without -b/--bt_keys!")
 
-    if args.password is None and args.method == "amazfit":
+    if "login_method" in config.keys():
+        login_method = config["login_method"]
+    else:
+        login_method = args.method
+
+
+    if no_logout == None:
+        no_logout = args.no_logout
+
+    if args.password is None and login_method == "amazfit":
         args.password = getpass.getpass()
 
-    device = HuamiAmazfit(method=args.method,
+    device = HuamiAmazfit(method=login_method,
                           email=args.email,
                           password=args.password)
-    device.get_access_token()
-    device.login()
+
+    if "user_id" in config.keys():
+        device.user_id = config["user_id"]
+    if "login_token" in config.keys():
+        device.login_token = config["login_token"]
+    if "app_token" in config.keys():
+        device.app_token = config["app_token"]
+    if "no_logout" in config.keys():
+        no_logout = config["no_logout"]
+
+    if device.login_token == None and device.app_token == None:
+        device.get_access_token()
+        device.login()
 
     wearables = []
     if args.bt_keys or args.all:
@@ -380,8 +416,22 @@ if __name__ == "__main__":
     if args.gps or args.all:
         device.get_gps_data()
 
-    if args.no_logout:
+    if no_logout:
         print("\nNo logout!")
         print(f"app_token={device.app_token}\nlogin_token={device.login_token}")
+        config = {}
+        config["login_token"] = device.login_token
+        config["app_token"] = device.app_token
+        config["login_method"] = login_method
+        config["no_logout"] = no_logout
+        config["user_id"] = device.user_id
+
+        config['country_code'] = device.country_code
+        config['device_id'] = device.device_id
+
+        f = open("config.json", 'w')
+        json.dump(config, f, indent=4, sort_keys=True)
+        f.close()
     else:
         device.logout()
+
