@@ -9,7 +9,7 @@ pipeline:
     image: python:3.9-buster
     when:
       event: pull_request
-      branch: main
+      branch: ci-test
     commands:
       - python -m pip install --upgrade pip
       - python -m pip install -r requirements.txt
@@ -22,7 +22,7 @@ pipeline:
     image: python:${TAG}-buster
     when:
       event: pull_request
-      branch: main
+      branch: ci-test
 
     commands:
       - ls
