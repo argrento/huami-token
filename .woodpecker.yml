@@ -1,0 +1,42 @@
+
+# This config shows how to handle Python-CI focusing on code quaility 
+# was taken from https://codeberg.org/sail.black/serial-sphinx/src/branch/main/.woodpecker.yml
+# check there for license information
+
+
+pipeline:
+  standardize: 
+    image: python:3.9-buster
+    when:
+      event: pull_request
+      branch: main
+    commands:
+      - python -m pip install --upgrade pip
+      - python -m pip install -r requirements.txt
+      - python -m pip install pylint flake8 mypy>=0.971
+      - python -m flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+      - mypy --strict serial_sphinx/
+      - python -m pylint -f parseable serial_sphinx/*.py 
+      
+  build:
+    image: python:${TAG}-buster
+    when:
+      event: pull_request
+      branch: main
+
+    commands:
+      - ls
+      - python -m venv venv 
+      - /bin/bash -c "source venv/bin/activate"
+      - python -m pip install --upgrade pip
+      - python -m pip install -r requirements.txt
+      - pytest tests/
+
+
+
+matrix:
+  TAG:
+    - 3.7
+    - 3.9
+    - 3.8
+    - 3.10
