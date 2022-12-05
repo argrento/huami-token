@@ -31,6 +31,8 @@ import random
 import shutil
 import urllib
 import uuid
+import zipfile
+import zlib
 
 import requests
 from rich import box
@@ -39,6 +41,9 @@ from rich.table import Table
 
 import urls
 import errors
+
+def encode_uint32(value) -> bytes:
+    return bytes([value & 0xff]) + bytes([(value >> 8) & 0xff]) + bytes([(value >> 16) & 0xff]) + bytes([(value >> 24) & 0xff]);
 
 class HuamiAmazfit:
     """Base class for logging in and receiving auth keys and GPS packs"""
@@ -263,6 +268,32 @@ class HuamiAmazfit:
                 with open(agps_file_names[pack_idx], 'wb') as gps_file:
                     shutil.copyfileobj(request.raw, gps_file)
 
+    def build_gps_uihh(self) -> None:
+        print("Building gps_uihh.bin")
+        d = {'gps_alm.bin':0x05, 'gln_alm.bin':0x0f, 'lle_bds.lle':0x86, 'lle_gps.lle':0x87, 'lle_glo.lle':0x88, 'lle_gal.lle':0x89, 'lle_qzss.lle':0x8a}
+        cep_archive = zipfile.ZipFile('cep_7days.zip', 'r')
+        lle_archive = zipfile.ZipFile('lle_1week.zip', 'r')
+        f = open('gps_uihh.bin', 'wb')
+        content = bytes()
+        filecontent = bytes()
+        fileheader = bytes()
+           
+        for key, value in d.items():
+            if value >= 0x86:
+                filecontent = lle_archive.read(key)
+            else:
+                filecontent = cep_archive.read(key)    
+        
+            fileheader = bytes([1]) + bytes([value]) + encode_uint32(len(filecontent)) + encode_uint32(zlib.crc32(filecontent) & 0xffffffff)
+            content += fileheader + filecontent
+    
+        header = b'UIHH' + bytes([0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01]) + encode_uint32(zlib.crc32(content) & 0xffffffff) + \
+            bytes([0x00, 0x00, 0x00, 0x00, 0x00, 0x00]) + encode_uint32(len(content)) + bytes([0x00, 0x00, 0x00, 0x00, 0x00, 0x00])
+                
+        content = header + content
+        f.write(content)
+        f.close()   
+    
     def logout(self) -> None:
         """Log out from the current account"""
         logout_url = urls.URLS['logout']
@@ -379,6 +410,7 @@ if __name__ == "__main__":
 
     if args.gps or args.all:
         device.get_gps_data()
+        device.build_gps_uihh()
 
     if args.no_logout:
         print("\nNo logout!")
