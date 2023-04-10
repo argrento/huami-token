@@ -27,11 +27,11 @@ URLS = {
                     '_locale=en_US&response_type=code',
     'tokens_amazfit': 'https://api-user.huami.com/registrations/{user_email}/tokens',
     'login_amazfit': 'https://account.huami.com/v2/client/login',
-    'devices': 'https://api-mifit-us2.huami.com/users/{user_id}/devices',
-    'agps': 'https://api-mifit-us2.huami.com/apps/com.huami.midong/fileTypes/{pack_name}/files',
-    'data_short': 'https://api-mifit-us2.huami.com/users/{user_id}/deviceTypes/4/data',
-    'logout': 'https://account-us2.huami.com/v1/client/logout',
-    'fw_updates': 'https://api-mifit-us2.huami.com/devices/ALL/hasNewVersion'
+    'devices': 'https://api-mifit.huami.com/users/{user_id}/devices',
+    'agps': 'https://api-mifit.huami.com/apps/com.huami.midong/fileTypes/{pack_name}/files',
+    'data_short': 'https://api-mifit.huami.com/users/{user_id}/deviceTypes/4/data',
+    'logout': 'https://account.huami.com/v1/client/logout',
+    'fw_updates': 'https://api-mifit.huami.com/devices/ALL/hasNewVersion'
 }
 
 PAYLOADS = {

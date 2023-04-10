@@ -89,7 +89,7 @@ class HuamiAmazfit:
             redirect_url_parameters = urllib.parse.parse_qs(redirect_url.query)
 
             if 'error' in redirect_url_parameters:
-                raise ValueError(f"Wrong E-mail or Password." \
+                raise ValueError(f"Wrong E-mail or Password. " \
                                  f"Error: {redirect_url_parameters['error']}")
 
             if 'access' not in redirect_url_parameters:
