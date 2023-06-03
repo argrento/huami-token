@@ -1,8 +1,8 @@
 pipeline:
-  standardize: 
+  style_check: 
     image: python:3.9-buster
-    when:
-      event: pull_request
+#    when:
+#      event: pull_request
     commands:
       - python -m pip install --upgrade pip
       - python -m pip install -r requirements.txt
@@ -11,10 +11,10 @@ pipeline:
       - mypy --strict ./
       - python -m pylint -f parseable ./*.py 
       
-  build:
+  unit_tests:
     image: python:${TAG}-buster
-    when:
-      event: pull_request
+#    when:
+#      event: pull_request
     commands:
       - ls
       - python -m venv venv 
@@ -22,10 +22,11 @@ pipeline:
       - python -m pip install --upgrade pip
       - python -m pip install -r requirements.txt
       - pytest tests/
+    secrets: [ amazfit_email, amazfit_password ]
 
 matrix:
   TAG:
-    - 3.7
-    - 3.9
     - 3.8
+    - 3.9
     - 3.10
+    - 3.11
