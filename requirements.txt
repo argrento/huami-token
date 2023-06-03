@@ -1,3 +1,4 @@
 requests
 pytest-pylint==0.18.0
 pytest-flake8==1.0.6
+types-requests

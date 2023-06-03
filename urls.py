@@ -20,7 +20,7 @@
 
 """Module for storin urls and payloads fro different requests"""
 
-from typing import Dict, Any
+from typing import Dict
 
 URLS = {
     'login_xiaomi': 'https://account.xiaomi.com/oauth2/authorize?skip_confirm=false&'

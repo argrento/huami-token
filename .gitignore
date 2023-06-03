@@ -7,3 +7,4 @@ __pycache__
 *.fw
 *.bin
 venv
+.mypy_cache
