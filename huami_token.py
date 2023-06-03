@@ -25,7 +25,7 @@ import random
 import shutil
 import urllib
 import uuid
-from typing import Iterator, Tuple
+from typing import Iterator, Tuple, Optional, Dict, Union, Any, List
 import zipfile
 import zlib
 
@@ -34,24 +34,24 @@ import requests
 import errors
 import urls
 
-def encode_uint32(value) -> bytes:
+def encode_uint32(value: int) -> bytes:
     return bytes([value & 0xff]) + bytes([(value >> 8) & 0xff]) + bytes([(value >> 16) & 0xff]) + bytes([(value >> 24) & 0xff]);
 
 class HuamiAmazfit:
     """Base class for logging in and receiving auth keys and GPS packs"""
-    def __init__(self, method="amazfit", email=None, password=None):
+    def __init__(self, method: str = "amazfit", email: str = "", password: str = "") -> None:
 
         if method == 'amazfit' and (not email or not password):
             raise ValueError("For Amazfit method E-Mail and Password can not be null.")
-        self.method = method
-        self.email = email
-        self.password = password
-        self.access_token = None
-        self.country_code = None
+        self.method: str = method
+        self.email: str = email
+        self.password: str = password
+        self.access_token: str = ""
+        self.country_code: str = ""
 
-        self.app_token = None
-        self.login_token = None
-        self.user_id = None
+        self.app_token: str = ""
+        self.login_token: str = ""
+        self.user_id: str = ""
 
         self.r = str(uuid.uuid4())
 
@@ -76,7 +76,7 @@ class HuamiAmazfit:
             if 'code' not in token_url_parameters:
                 raise ValueError("No 'code' parameter in login url.")
 
-            self.access_token = token_url_parameters['code']
+            self.access_token = str(token_url_parameters['code'])
             self.country_code = 'US'
 
         elif self.method == 'amazfit':
@@ -91,7 +91,7 @@ class HuamiAmazfit:
 
             # 'Location' parameter contains url with login status
             redirect_url = urllib.parse.urlparse(response.headers.get('Location'))
-            redirect_url_parameters = urllib.parse.parse_qs(redirect_url.query)
+            redirect_url_parameters = urllib.parse.parse_qs(str(redirect_url.query))
 
             if 'error' in redirect_url_parameters:
                 raise ValueError(f"Wrong E-mail or Password." \
@@ -108,19 +108,19 @@ class HuamiAmazfit:
                 self.country_code = region[0:2].upper()
 
             else:
-                self.country_code = redirect_url_parameters['country_code']
+                self.country_code = redirect_url_parameters['country_code'][0]
 
-            self.access_token = redirect_url_parameters['access']
+            self.access_token = redirect_url_parameters['access'][0]
         return self.access_token
 
-    def login(self, external_token=None) -> None:
+    def login(self, external_token: str = "") -> str:
         """Perform login and get app and login tokens"""
         if external_token:
             self.access_token = external_token
 
         login_url = urls.URLS['login_amazfit']
 
-        data = urls.PAYLOADS['login_amazfit']
+        data: Dict[str, str] = urls.PAYLOADS['login_amazfit']
         data['country_code'] = self.country_code
         data['device_id'] = self.device_id
         data['third_name'] = 'huami' if self.method == 'amazfit' else 'mi-watch'
@@ -154,7 +154,7 @@ class HuamiAmazfit:
         self.user_id = token_info['user_id']
         return self.user_id
 
-    def get_wearables(self) -> dict:
+    def get_wearables(self) -> List[Dict[str, Any]]:
         """Request a list of linked devices"""
         devices_url = urls.URLS['devices'].format(user_id=urllib.parse.quote(self.user_id))
 
@@ -198,10 +198,10 @@ class HuamiAmazfit:
         return _wearables
 
     @staticmethod
-    def get_firmware(_wearable: dict) -> Tuple[str, str]:
+    def get_firmware(_wearable: Dict[str, str]) -> Tuple[List[str], List[str]]:
         """Check and download updates for the furmware and fonts"""
         fw_url = urls.URLS["fw_updates"]
-        params = urls.PAYLOADS["fw_updates"]
+        params: Dict[str, Union[str, Any]] = urls.PAYLOADS["fw_updates"]
         params['deviceSource'] = _wearable['device_source']
         params['firmwareVersion'] = _wearable['firmware_version']
         params['hardwareVersion'] = _wearable['hardware_version']
@@ -272,7 +272,7 @@ class HuamiAmazfit:
         f.write(content)
         f.close()
 
-    def logout(self) -> None:
+    def logout(self) -> str:
         """Log out from the current account"""
         logout_url = urls.URLS['logout']
 
@@ -280,7 +280,7 @@ class HuamiAmazfit:
         data['login_token'] = self.login_token
 
         response = requests.post(logout_url, data=data)
-        logout_result = response.json()['result']
+        logout_result = str(response.json()['result'])
         return logout_result
 
 

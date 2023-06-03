@@ -1,5 +1,5 @@
 from unittest import TestCase
 
 class TryTesting(TestCase):
-    def test_always_passes(self):
+    def test_always_passes(self) -> None:
         self.assertTrue(True)

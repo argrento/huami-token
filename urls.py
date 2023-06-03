@@ -20,6 +20,8 @@
 
 """Module for storin urls and payloads fro different requests"""
 
+from typing import Dict, Any
+
 URLS = {
     'login_xiaomi': 'https://account.xiaomi.com/oauth2/authorize?skip_confirm=false&'
                     'client_id=2882303761517383915&pt=0&scope=1+6000+16001+20000&'
@@ -34,12 +36,12 @@ URLS = {
     'fw_updates': 'https://api-mifit-us2.huami.com/devices/ALL/hasNewVersion'
 }
 
-PAYLOADS = {
-    'login_xiaomi': None,
+PAYLOADS: Dict[str, Dict[str, str]] = {
+    'login_xiaomi': {},
     'tokens_amazfit': {
         'state':        'REDIRECTION',
         'client_id':    'HuaMi',
-        'password':     None,
+        'password':     "",
         'redirect_uri': 'https://s3-us-west-2.amazonws.com/hm-registration/successsignin.html',
         'region':       'us-west-2',
         'token':        'access',
@@ -51,39 +53,39 @@ PAYLOADS = {
                               'api-analytics.huami.com,api-mifit.huami.com',
         'app_version':        '5.9.2-play_100355',
         'source':             'com.huami.watch.hmwatchmanager',
-        'country_code':       None,
-        'device_id':          None,
-        'third_name':         None,
+        'country_code':       "",
+        'device_id':          "",
+        'third_name':         "",
         'lang':               'en',
         'device_model':       'android_phone',
         'allow_registration': 'false',
         'app_name':           'com.huami.midong',
-        'code':               None,
-        'grant_type':         None
+        'code':               "",
+        'grant_type':         ""
     },
     'devices': {
-        'apptoken': None,
+        'apptoken': "",
         # 'enableMultiDevice': 'true'
     },
     'agps': {
-        'apptoken': None
+        'apptoken': ""
     },
     'data_short': {
-        'apptoken': None,
-        'startDay': None,
-        'endDay': None
+        'apptoken': "",
+        'startDay': "",
+        'endDay': ""
     },
     'logout': {
-        'login_token': None
+        'login_token': ""
     },
     'fw_updates': {
-        'productionSource': None,
-        'deviceSource': None,
+        'productionSource': "",
+        'deviceSource': "",
         'fontVersion': '0',
         'fontFlag': '0',
         'appVersion': '5.9.2-play_100355',
-        'firmwareVersion': None,
-        'hardwareVersion': None,
+        'firmwareVersion': "",
+        'hardwareVersion': "",
         'support8Bytes': 'true'
     }
 }
