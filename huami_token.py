@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # pylint: disable=too-many-instance-attributes
 # pylint: disable=invalid-name
-# Copyright (c) 2020 Kirill Snezhko
+# Copyright (c) 2020-2023 Kirill Snezhko
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
@@ -17,6 +17,8 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+
+
 """Main module"""
 import argparse
 import getpass
@@ -28,11 +30,14 @@ import uuid
 from typing import Tuple, Dict, Union, Any, List
 import zipfile
 import zlib
+import hashlib
+import base64
 
 import requests
 
 import errors
 import urls
+import time
 
 def encode_uint32(value: int) -> bytes:
     """Convert 4-bytes value into a list with 4 bytes"""
@@ -56,6 +61,12 @@ class HuamiAmazfit:
         self.user_id: str = ""
 
         self.r = str(uuid.uuid4())
+
+        # For Mi Fitness
+        self.ssecurity: str = None
+        self.nonce: str = None
+        self.cUserId: str = None
+        self.psecurity: str = None
 
         # IMEI or something unique
         self.device_id = (
@@ -115,48 +126,186 @@ class HuamiAmazfit:
                 self.country_code = redirect_url_parameters['country_code'][0]
 
             self.access_token = redirect_url_parameters['access'][0]
+        elif self.method == "mifitness":
+            print("Step 1: getting sign and callback... ", end="")
+            password_hash = hashlib.md5(args.password.encode()).hexdigest().upper()
+            url = urls.URLS["login_mi_fitness"]
+            headers = urls.PAYLOADS["initial_login_mi_fitness"]
+            headers["Cookie"] = headers["Cookie"].format(userId=self.email, deviceId="foobar")
+
+            params = {
+                "_json": "true",
+                "sid": "miothealth",
+                "_locale": "en_US"
+            }
+
+            response = requests.get(url, headers=headers, params=params)
+
+            sign, callback, qs = None, None, None
+            if response.status_code == 200:
+                response_data = json.loads(response.text.replace('&&&START&&&', ''))
+                sign = response_data.get("_sign", "")
+                callback = response_data.get("callback", "")
+                qs = response_data.get("qs", "")
+            else:
+                raise ValueError(f"Request failed with status code: {response.status_code}")
+            print(f"OK\n{sign=}, {callback=}, {qs=}")
+
+            print("\nStep 2: getting security parameters... ", end="")
+            url = urls.URLS["auth2_mi_fitness"]
+            headers = urls.PAYLOADS["auth2_mi_fitness"]
+            headers["Cookie"] = headers["Cookie"].format(deviceId=self.device_id)
+
+            data = {
+                "qs": qs,
+                "callback": callback,
+                "_json": "true",
+                "_sign": sign,
+                "user": self.email,
+                "hash": password_hash,
+                "sid": "miothealth",
+                "_locale": "en_US"
+            }
+
+            response = requests.post(url, headers=headers, data=data)
+
+            if response.status_code == 200:
+                response_data = json.loads(response.text.replace('&&&START&&&', ''))
+                error_code = str(response_data.get("code"))
+                if error_code != "0":
+                    print("ERROR")
+                    raise ValueError(f"Step failed. {errors.ERRORS[error_code]}")
+
+                ssecurity = response_data.get("ssecurity", "")
+                psecurity = response_data.get("psecurity", "")
+                passToken = response_data.get("passToken", "")
+                cUserId = response_data.get("cUserId", "")
+                self.user_id = response_data.get("userId", "")
+                location = response_data.get("location", "")
+
+            else:
+                raise ValueError(f"Request failed with status code: {response.status_code}")
+            print(f"OK\n{ssecurity=}, {psecurity=}, {passToken=}, {cUserId=}, userId={self.user_id}")
+
+            print("\nStep 3: getting sts... ", end="")
+            response = requests.get(location)
+            if response.status_code != 200:
+                print("ERROR")
+                raise ValueError(f"Step failed: {response.text}")
+            print(f"OK")
+
+            print("\nStep 4: agree to privacy... ", end="")
+            url = urls.URLS["privacy_mi_fitness"]
+            headers = urls.PAYLOADS["privacy_mi_fitness"]
+            timestamp = str(int(time.time() * 1000))
+            headers["timestamp"] = timestamp
+
+            data = {
+                "apkVersion": "3.16.0i",
+                "idContent": cUserId,
+                "language": "en",
+                "miuiVersion": "unknown",
+                "pkg": "com.xiaomi.wearable",
+                "policyName": "miaccount",
+                "policyVersion": "",
+                "region": "DE",
+                "timestamp": timestamp
+            }
+            headers["sign"] = self._compute_sign(data)
+
+            response = requests.post(url, headers=headers, json=data)
+            if response.status_code != 200:
+                print("ERROR")
+                raise ValueError(f"Step failed: {response.text}")
+
+            r = json.loads(response.text)
+            if "code" in r:
+                if r["code"] != 200:
+                    print("ERROR")
+                    raise ValueError(f"Server returned an error: {response.text}")
+
+            print(f"OK\n{response.text}\n")
+            self.access_token = passToken
+
         return self.access_token
 
-    def login(self, external_token: str = "") -> str:
+    def login(self, method: str, external_token: str = "") -> str:
         """Perform login and get app and login tokens"""
-        if external_token:
-            self.access_token = external_token
+        if method in ["amazfit", "xiaomi"]:
+            if external_token:
+                self.access_token = external_token
 
-        login_url = urls.URLS['login_amazfit']
+            login_url = urls.URLS['login_amazfit']
 
-        data: Dict[str, str] = urls.PAYLOADS['login_amazfit']
-        data['country_code'] = self.country_code
-        data['device_id'] = self.device_id
-        data['third_name'] = 'huami' if self.method == 'amazfit' else 'mi-watch'
-        data['code'] = self.access_token
-        data['grant_type'] = 'access_token' if self.method == 'amazfit' else 'request_token'
+            data: Dict[str, str] = urls.PAYLOADS['login_amazfit']
+            data['country_code'] = self.country_code
+            data['device_id'] = self.device_id
+            data['third_name'] = 'huami' if self.method == 'amazfit' else 'mi-watch'
+            data['code'] = self.access_token
+            data['grant_type'] = 'access_token' if self.method == 'amazfit' else 'request_token'
 
-        response = requests.post(login_url, data=data, allow_redirects=False, timeout=10)
-        response.raise_for_status()
-        login_result = response.json()
+            response = requests.post(login_url, data=data, allow_redirects=False, timeout=10)
+            response.raise_for_status()
+            login_result = response.json()
 
-        if 'error_code' in login_result:
-            error_code = login_result['error_code']
-            error_message = errors.ERRORS.get(error_code, error_code)
-            raise ValueError(f"Login error. Error: {error_message}")
+            if 'error_code' in login_result:
+                error_code = login_result['error_code']
+                error_message = errors.ERRORS.get(error_code, error_code)
+                raise ValueError(f"Login error. Error: {error_message}")
 
-        if 'token_info' not in login_result:
-            raise ValueError("No 'token_info' parameter in login data.")
-        # else
-        # Do not need else, because raise breaks control flow
-        token_info = login_result['token_info']
-        if 'app_token' not in token_info:
-            raise ValueError("No 'app_token' parameter in login data.")
-        self.app_token = token_info['app_token']
+            if 'token_info' not in login_result:
+                raise ValueError("No 'token_info' parameter in login data.")
+            # else
+            # Do not need else, because raise breaks control flow
+            token_info = login_result['token_info']
+            if 'app_token' not in token_info:
+                raise ValueError("No 'app_token' parameter in login data.")
+            self.app_token = token_info['app_token']
 
-        if 'login_token' not in token_info:
-            raise ValueError("No 'login_token' parameter in login data.")
-        self.login_token = token_info['login_token']
+            if 'login_token' not in token_info:
+                raise ValueError("No 'login_token' parameter in login data.")
+            self.login_token = token_info['login_token']
 
-        if 'user_id' not in token_info:
-            raise ValueError("No 'user_id' parameter in login data.")
-        self.user_id = token_info['user_id']
-        return self.user_id
+            if 'user_id' not in token_info:
+                raise ValueError("No 'user_id' parameter in login data.")
+            self.user_id = token_info['user_id']
+            return self.user_id
+        elif method == "mifitness":
+            login_url = urls.URLS['login_mi_fitness']
+            headers = urls.PAYLOADS['login_mi_fitness']
+            headers["Cookie"] = headers["Cookie"].format(
+                passToken=external_token,
+                userId=self.user_id,
+                deviceId="foobar"
+            )
+
+            params = {
+                "_json": "true",
+                "appName": "com.xiaomi.wearable",
+                "sid": "passportapi",
+                "_locale": "en_DE"
+            }
+
+            response = requests.get(login_url, headers=headers, params=params)
+            if response.status_code != 200:
+                print("ERROR")
+                raise ValueError(f"Step failed: {response.text}")
+
+            response_data = json.loads(response.text.replace('&&&START&&&', ''))
+            error_code = str(response_data.get("code"))
+            if error_code != "0":
+                print("ERROR")
+                raise ValueError(f"Step failed. {errors.ERRORS[error_code]}")
+
+            self.ssecurity = str(response_data.get("ssecurity"))
+            self.nonce = str(response_data.get("nonce"))
+            self.cUserId = str(response_data.get("cUserId"))
+            self.psecurity = str(response_data.get("psecurity"))
+
+            print(f"ssecurity={self.ssecurity}, psecurity={self.psecurity}, nonce={self.nonce}, cUserId={self.cUserId}")
+
+
+            return self.user_id
 
     def get_wearables(self) -> List[Dict[str, Any]]:
         """Request a list of linked devices"""
@@ -294,16 +443,25 @@ class HuamiAmazfit:
         result = str(response.json()['result'])
         return result
 
+    def _compute_sign(self, params):
+        uuid = "2dcd9s0c-ad3f-2fas-0l3a-abzo301jd0s9"
+        sorted_pairs = sorted(params.items())
+        combined_string = uuid + "".join(f"{key}={value}" for key, value in sorted_pairs) + uuid
+        base64_string = base64.b64encode(combined_string.encode("utf-8"))
+        md5_hash = hashlib.md5(base64_string).hexdigest()
+        return md5_hash.upper().zfill(32)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Obtain Bluetooth Auth key from Amazfit "
                                                  "servers and download AGPS data.")
     parser.add_argument("-m",
                         "--method",
-                        choices=["amazfit", "xiaomi"],
+                        choices=["amazfit", "xiaomi", "mifitness"],
                         default="amazfit",
                         required=True,
-                        help="Login method ")
+                        help="Login method. 'mifitness' -- experimental support")
+
     parser.add_argument("-e",
                         "--email",
                         required=False,
@@ -364,8 +522,10 @@ if __name__ == "__main__":
     print(f"Token: {access_token}")
 
     print("Logging in...")
-    user_id = device.login(external_token=access_token)
+    user_id = device.login(method=args.method, external_token=access_token)
     print(f"Logged in! User id: {user_id}")
+
+    raise NotImplementedError("Still in progress")
 
     print("Getting linked wearables...")
     wearables = []

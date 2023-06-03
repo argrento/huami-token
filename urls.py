@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Kirill Snezhko
+# Copyright (c) 2020-2023 Kirill Snezhko
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -22,6 +22,9 @@
 
 from typing import Dict
 
+from fake_useragent import UserAgent
+ua = UserAgent()
+
 URLS = {
     'login_xiaomi': 'https://account.xiaomi.com/oauth2/authorize?skip_confirm=false&'
                     'client_id=2882303761517383915&pt=0&scope=1+6000+16001+20000&'
@@ -33,7 +36,10 @@ URLS = {
     'agps': 'https://api-mifit-us2.huami.com/apps/com.huami.midong/fileTypes/{pack_name}/files',
     'data_short': 'https://api-mifit-us2.huami.com/users/{user_id}/deviceTypes/4/data',
     'logout': 'https://account-us2.huami.com/v1/client/logout',
-    'fw_updates': 'https://api-mifit-us2.huami.com/devices/ALL/hasNewVersion'
+    'fw_updates': 'https://api-mifit-us2.huami.com/devices/ALL/hasNewVersion',
+    'login_mi_fitness': 'https://account.xiaomi.com/pass/serviceLogin',
+    'auth2_mi_fitness': 'https://account.xiaomi.com/pass/serviceLoginAuth2',
+    'privacy_mi_fitness': 'https://data.sec.miui.com/privacy/agree/v1'
 }
 
 PAYLOADS: Dict[str, Dict[str, str]] = {
@@ -87,5 +93,33 @@ PAYLOADS: Dict[str, Dict[str, str]] = {
         'firmwareVersion': "",
         'hardwareVersion': "",
         'support8Bytes': 'true'
+    },
+    'initial_login_mi_fitness': {
+        "User-Agent": ua.random,
+        "Cookie": "userId={userId}; deviceId={deviceId}"
+    },
+    'auth2_mi_fitness': {
+        "User-Agent": ua.random,
+        "Cookie": "deviceId={deviceId}",
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Accept-Encoding": "gzip"
+    },
+    'privacy_mi_fitness': {
+        "sign": None,
+        "timestamp": None,
+        "source": "sdk",
+        "Content-Type": "application/json; charset=UTF-8",
+        "User-Agent": ua.random,
+        "Host": "data.sec.miui.com",
+        "Connection": "Keep-Alive",
+        "Accept-Encoding": "gzip"
+    },
+    'login_mi_fitness': {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "User-Agent": ua.random,
+        "Cookie": "passToken={passToken}; userId={userId}; deviceId={deviceId}",
+        "Host": "account.xiaomi.com",
+        "Connection": "Keep-Alive",
+        "Accept-Encoding": "gzip"
     }
 }
