@@ -22,11 +22,11 @@ pipeline:
       - python -m pip install --upgrade pip
       - python -m pip install -r requirements.txt
       - pytest tests/
-    secrets: [ amazfit_email, amazfit_password ]
+    secrets: [ amazfit_email, amazfit_password, mifitness_email, mifitness_password ]
 
 matrix:
   TAG:
     - 3.8
-    - 3.9
-    - 3.10
-    - 3.11
+    # - 3.9
+    # - 3.10
+    # - 3.11

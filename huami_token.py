@@ -131,7 +131,7 @@ class HuamiAmazfit:
             self.access_token = redirect_url_parameters['access'][0]
         elif self.method == "mifitness":
             print("Step 1: getting sign and callback... ", end="")
-            password_hash = hashlib.md5(args.password.encode()).hexdigest().upper()
+            password_hash = hashlib.md5(self.password.encode()).hexdigest().upper()
             url = urls.URLS["login_mi_fitness"]
             headers = urls.PAYLOADS["initial_login_mi_fitness"]
             headers["Cookie"] = headers["Cookie"].format(userId=self.email, deviceId="foobar")
@@ -142,7 +142,7 @@ class HuamiAmazfit:
                 "_locale": "en_US"
             }
 
-            response = requests.get(url, headers=headers, params=params, timeout=1)
+            response = requests.get(url, headers=headers, params=params, timeout=10)
 
             sign, callback, qs = None, None, None
             if response.status_code == 200:
@@ -174,10 +174,16 @@ class HuamiAmazfit:
 
             if response.status_code == 200:
                 response_data = json.loads(response.text.replace('&&&START&&&', ''))
-                error_code = str(response_data.get("code"))
-                if error_code != "0":
+                error_code = response_data.get("code")
+                if error_code != 0:
                     print("ERROR")
                     raise ValueError(f"Step failed. {errors.ERRORS[error_code]}")
+
+                security_status = response_data.get("securityStatus")
+                if security_status != 0:
+                    raise ValueError(f"""Additional security step """
+                                     f"""required. Use use this url and restart script:\n"""
+                                     f"""{response_data["notificationUrl"]}""")
 
                 ssecurity = response_data.get("ssecurity", "")
                 psecurity = response_data.get("psecurity", "")
@@ -567,7 +573,7 @@ if __name__ == "__main__":
                             print(f"\u2551  Hash: {hash_sum}")
                             with requests.get(link, stream=True, timeout=10) as dl_request:
                                 with open(file_name, 'wb') as f:
-                                    shutil.copyfileobj(dl_request.raw, dl_request)
+                                    shutil.copyfileobj(dl_request.raw, f)
                     else:
                         print("\u2551  No updates found")
                     print(footer)
