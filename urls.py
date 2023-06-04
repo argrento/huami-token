@@ -22,7 +22,7 @@
 
 from typing import Dict
 
-from fake_useragent import UserAgent
+from fake_useragent import UserAgent # type: ignore
 ua = UserAgent()
 
 URLS = {
@@ -105,8 +105,8 @@ PAYLOADS: Dict[str, Dict[str, str]] = {
         "Accept-Encoding": "gzip"
     },
     'privacy_mi_fitness': {
-        "sign": None,
-        "timestamp": None,
+        "sign": "",
+        "timestamp": "",
         "source": "sdk",
         "Content-Type": "application/json; charset=UTF-8",
         "User-Agent": ua.random,

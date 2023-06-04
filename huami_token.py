@@ -18,6 +18,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+# Temporary
+#pylint: disable=too-many-branches, too-many-statements, too-many-locals
+
 
 """Main module"""
 import argparse
@@ -32,12 +35,12 @@ import zipfile
 import zlib
 import hashlib
 import base64
+import time
 
 import requests
 
 import errors
 import urls
-import time
 
 def encode_uint32(value: int) -> bytes:
     """Convert 4-bytes value into a list with 4 bytes"""
@@ -63,10 +66,10 @@ class HuamiAmazfit:
         self.r = str(uuid.uuid4())
 
         # For Mi Fitness
-        self.ssecurity: str = None
-        self.nonce: str = None
-        self.cUserId: str = None
-        self.psecurity: str = None
+        self.ssecurity: str = ""
+        self.nonce: str = ""
+        self.cUserId: str = ""
+        self.psecurity: str = ""
 
         # IMEI or something unique
         self.device_id = (
@@ -139,7 +142,7 @@ class HuamiAmazfit:
                 "_locale": "en_US"
             }
 
-            response = requests.get(url, headers=headers, params=params)
+            response = requests.get(url, headers=headers, params=params, timeout=1)
 
             sign, callback, qs = None, None, None
             if response.status_code == 200:
@@ -167,7 +170,7 @@ class HuamiAmazfit:
                 "_locale": "en_US"
             }
 
-            response = requests.post(url, headers=headers, data=data)
+            response = requests.post(url, headers=headers, data=data, timeout=1)
 
             if response.status_code == 200:
                 response_data = json.loads(response.text.replace('&&&START&&&', ''))
@@ -185,14 +188,15 @@ class HuamiAmazfit:
 
             else:
                 raise ValueError(f"Request failed with status code: {response.status_code}")
-            print(f"OK\n{ssecurity=}, {psecurity=}, {passToken=}, {cUserId=}, userId={self.user_id}")
+            print(f"""OK\n{ssecurity=}, {psecurity=}, {passToken=}, """
+                  f"""{cUserId=}, userId={self.user_id}""")
 
             print("\nStep 3: getting sts... ", end="")
-            response = requests.get(location)
+            response = requests.get(location, timeout=1)
             if response.status_code != 200:
                 print("ERROR")
                 raise ValueError(f"Step failed: {response.text}")
-            print(f"OK")
+            print("OK")
 
             print("\nStep 4: agree to privacy... ", end="")
             url = urls.URLS["privacy_mi_fitness"]
@@ -213,7 +217,7 @@ class HuamiAmazfit:
             }
             headers["sign"] = self._compute_sign(data)
 
-            response = requests.post(url, headers=headers, json=data)
+            response = requests.post(url, headers=headers, json=data, timeout=10)
             if response.status_code != 200:
                 print("ERROR")
                 raise ValueError(f"Step failed: {response.text}")
@@ -229,9 +233,9 @@ class HuamiAmazfit:
 
         return self.access_token
 
-    def login(self, method: str, external_token: str = "") -> str:
+    def login(self, external_token: str = "") -> str:
         """Perform login and get app and login tokens"""
-        if method in ["amazfit", "xiaomi"]:
+        if self.method in ["amazfit", "xiaomi"]:
             if external_token:
                 self.access_token = external_token
 
@@ -269,8 +273,8 @@ class HuamiAmazfit:
             if 'user_id' not in token_info:
                 raise ValueError("No 'user_id' parameter in login data.")
             self.user_id = token_info['user_id']
-            return self.user_id
-        elif method == "mifitness":
+
+        elif self.method == "mifitness":
             login_url = urls.URLS['login_mi_fitness']
             headers = urls.PAYLOADS['login_mi_fitness']
             headers["Cookie"] = headers["Cookie"].format(
@@ -286,7 +290,7 @@ class HuamiAmazfit:
                 "_locale": "en_DE"
             }
 
-            response = requests.get(login_url, headers=headers, params=params)
+            response = requests.get(login_url, headers=headers, params=params, timeout=10)
             if response.status_code != 200:
                 print("ERROR")
                 raise ValueError(f"Step failed: {response.text}")
@@ -302,10 +306,10 @@ class HuamiAmazfit:
             self.cUserId = str(response_data.get("cUserId"))
             self.psecurity = str(response_data.get("psecurity"))
 
-            print(f"ssecurity={self.ssecurity}, psecurity={self.psecurity}, nonce={self.nonce}, cUserId={self.cUserId}")
+            print(f"""ssecurity={self.ssecurity}, psecurity={self.psecurity}, """
+                  f"""nonce={self.nonce}, cUserId={self.cUserId}""")
 
-
-            return self.user_id
+        return self.user_id
 
     def get_wearables(self) -> List[Dict[str, Any]]:
         """Request a list of linked devices"""
@@ -443,10 +447,12 @@ class HuamiAmazfit:
         result = str(response.json()['result'])
         return result
 
-    def _compute_sign(self, params):
-        uuid = "2dcd9s0c-ad3f-2fas-0l3a-abzo301jd0s9"
+    def _compute_sign(self, params: Dict[str, str]) -> str:
+        magic_uuid = "2dcd9s0c-ad3f-2fas-0l3a-abzo301jd0s9"
         sorted_pairs = sorted(params.items())
-        combined_string = uuid + "".join(f"{key}={value}" for key, value in sorted_pairs) + uuid
+        combined_string = magic_uuid + \
+            "".join(f"{key}={value}" for key, value in sorted_pairs) + \
+                magic_uuid
         base64_string = base64.b64encode(combined_string.encode("utf-8"))
         md5_hash = hashlib.md5(base64_string).hexdigest()
         return md5_hash.upper().zfill(32)
@@ -522,10 +528,8 @@ if __name__ == "__main__":
     print(f"Token: {access_token}")
 
     print("Logging in...")
-    user_id = device.login(method=args.method, external_token=access_token)
+    user_id = device.login(external_token=access_token)
     print(f"Logged in! User id: {user_id}")
-
-    raise NotImplementedError("Still in progress")
 
     print("Getting linked wearables...")
     wearables = []
@@ -561,9 +565,9 @@ if __name__ == "__main__":
                             file_name = link.split('/')[-1]
                             print(f"\u2551  File: {file_name}")
                             print(f"\u2551  Hash: {hash_sum}")
-                            with requests.get(link, stream=True, timeout=10) as r:
+                            with requests.get(link, stream=True, timeout=10) as dl_request:
                                 with open(file_name, 'wb') as f:
-                                    shutil.copyfileobj(r.raw, f)
+                                    shutil.copyfileobj(dl_request.raw, dl_request)
                     else:
                         print("\u2551  No updates found")
                     print(footer)
