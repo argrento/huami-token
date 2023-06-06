@@ -1,8 +1,6 @@
 pipeline:
   style_check: 
     image: python:3.9-buster
-#    when:
-#      event: pull_request
     commands:
       - python -m pip install --upgrade pip
       - python -m pip install -r requirements.txt
@@ -11,10 +9,20 @@ pipeline:
       - mypy --strict ./
       - python -m pylint -f parseable ./*.py 
       
+  can_run_main:
+    image: python:${TAG}-buster
+    commands:
+      - ls
+      - python -m venv venv 
+      - /bin/bash -c "source venv/bin/activate"
+      - python -m pip install --upgrade pip
+      - python -m pip install -r requirements.txt
+      - python huami_token.py -m amazfit -e $AMAZFIT_EMAIL -p $AMAZFIT_PASSWORD -b >/dev/null 2>&1
+      - python3 -c "import socket; print(socket.gethostname())"
+    secrets: [ amazfit_email, amazfit_password ]
+
   unit_tests:
     image: python:${TAG}-buster
-#    when:
-#      event: pull_request
     commands:
       - ls
       - python -m venv venv 
