@@ -1,3 +1,5 @@
+Currently, this does not work due to API changes. More info: https://codeberg.org/argrento/huami-token/issues/119
+
 Huami-token is now hosted on [codeberg.org](https://codeberg.org/argrento/huami-token/).
 
 <a href="https://codeberg.org/argrento/huami-token/">
