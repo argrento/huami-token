@@ -55,11 +55,11 @@ options:
 
 
 ## Logging in with Amazfit account
-Run script with your credentials: `python3 huami_token.py --method amazfit --email youemail@example.com --password your_password --bt_keys`.
+Run script with your credentials: `python3 main.py --method amazfit --email youemail@example.com --password your_password --bt_keys`.
 
 Sample output:
 ```bash
-> python3 src.py --method amazfit --email my_email --password password --bt_keys
+> python3 main.py --method amazfit --email my_email --password password --bt_keys
 2025-11-14 18:41:43.316 | INFO     | src.zepp:login:48 - Logging in...
 2025-11-14 18:41:44.268 | INFO     | src.zepp:_get_refresh_and_access_tokens:108 - Received access and refresh tokens successfully
 2025-11-14 18:41:45.217 | INFO     | src.zepp:login:51 - Logged in! User id: 1234567890
