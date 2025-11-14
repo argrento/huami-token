@@ -9,7 +9,7 @@ pipeline:
       - python -m pip install pylint flake8 mypy>=0.971
       - python -m flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
       - mypy --strict ./
-      - python -m pylint -f parseable huami_token/*.py 
+      - python -m pylint -f parseable src/*.py
       
   unit_tests:
     image: python:${TAG}-buster
@@ -38,7 +38,7 @@ pipeline:
       - python -m pip install dist/*.whl
       - python -m pip install pytest
       - pytest tests/test_amazfit.py
-      - python -m huami_token -m amazfit -e $AMAZFIT_EMAIL -p $AMAZFIT_PASSWORD -b >/dev/null 2>&1
+      - python -m src -m amazfit -e $AMAZFIT_EMAIL -p $AMAZFIT_PASSWORD -b >/dev/null 2>&1
     secrets: [ amazfit_email, amazfit_password ]
 
   publish_release:

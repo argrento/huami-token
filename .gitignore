@@ -9,3 +9,5 @@ __pycache__
 venv
 .mypy_cache
 dist
+akps/
+frida-js/
