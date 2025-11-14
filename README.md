@@ -5,7 +5,7 @@ Huami-token is now hosted on [codeberg.org](https://codeberg.org/argrento/huami-
 </a>
 
 
-# Huami-token
+# Huami-token (Redesign in progress)
 
 [![status-badge](https://ci.codeberg.org/api/badges/argrento/huami-token/status.svg)](https://ci.codeberg.org/argrento/huami-token)
 

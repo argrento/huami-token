@@ -33,12 +33,12 @@ dev = [
 "Homepage" = "https://codeberg.org/argrento/huami-token"
 "Bug Tracker" = "https://codeberg.org/argrento/huami-token/issues"
 
-[project.scripts]
-huami-token = "huami_token.huami_token:main"
-
 [build-system]
 requires = ["hatchling>=1.25"]
 build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["huami_token"]
 
 [tool.ruff]
 line-length = 100
