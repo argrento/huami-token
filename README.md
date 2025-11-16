@@ -15,7 +15,7 @@ For progress on Xiaomi support, see https://codeberg.org/argrento/huami-token/is
 ## About
 
 To use new versions of Amazfit and Xiaomi watches and bands with Gadgetbridge you need special unique key.
-Read more here: https://codeberg.org/Freeyourgadget/Gadgetbridge/wiki/Huami-Server-Pairing.
+Read more here: https://gadgetbridge.org/basics/pairing/huami-xiaomi-server/.
 
 ## Community
 
