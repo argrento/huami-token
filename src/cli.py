@@ -7,10 +7,10 @@ as part of the project restructuring.
 
 import argparse
 import getpass
-
-import loguru
+from pathlib import Path
 
 from .errors import MigrationInProgressError
+from .helpers import build_gps_uihh
 from .zepp import Zepp
 
 
@@ -78,6 +78,7 @@ def main():
 
     if args.gps:
         device.download_gps_data()
+        build_gps_uihh(base_folder=Path.cwd())
 
     if args.no_logout:
         print("\nNo logout!")
