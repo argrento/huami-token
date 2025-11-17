@@ -191,6 +191,45 @@ class Zepp:
             logger.info(f"MAC: {mac}, Active: {active}")
             logger.info(f"Key: 0x{auth_key}")
 
+    def download_gps_data(self) -> str:
+        logger.info("Downloading GPS data...")
+        if not self.user_id or not self.app_token:
+            raise DeviceError("Cannot download GPS data without user_id and app_token")
+
+        params = URL_PARAMS.ZEPP_GPS.value.copy()
+        params["r"] = [str(uuid.uuid4())] * 2  # yes, twice again
+        params["userid"] = self.user_id
+        params["appid"] = secrets.randbits(64)  # random 64-bit integer again
+
+        headers = HEADERS.ZEPP_DEVICES.value.copy()
+        headers["x-request-id"] = str(uuid.uuid4())
+        headers["apptoken"] = self.app_token
+
+        for file_type in ["AGPS_ALM", "AGPSZIP", "LLE", "AGPS", "EPO"]:
+            response = requests.get(
+                URLS.ZEPP_GPS.value.format(file_type=file_type),
+                params=params,
+                headers=headers,
+            )
+            if response.status_code != 200:
+                raise DeviceError(
+                    code="get-gps-failed",
+                    message=f"Get GPS data failed with status code {response.status_code}",
+                )
+            response_data = response.json()
+            if file_url := response_data[0].get("fileUrl"):
+                file_name = file_url.split("/")[-1]
+
+                with requests.get(
+                    file_url, stream=True, timeout=10, headers=headers
+                ) as file_download_response:
+                    file_download_response.raise_for_status()
+                    with open(file_name, "wb") as gps_file:
+                        logger.info(f"Downloading {file_type} to {file_name}...")
+                        for chunk in file_download_response.iter_content(8192):
+                            if chunk:
+                                gps_file.write(chunk)
+
     def logout(self) -> str:
         """Logout from Zepp account"""
         if not self.login_token:

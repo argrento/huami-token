@@ -50,6 +50,7 @@ options:
   -p PASSWORD, --password PASSWORD
                         Account Password
   -b, --bt_keys         Get bluetooth tokens of paired devices
+  -g, --gps             Download GPS files (AGPS_ALM, AGPSZIP, LLE, etc.)
   -n, --no_logout       Do not logout, keep active session and display app token and access token
 ```
 
@@ -76,6 +77,15 @@ active or not.
 
 ## Logging in with Xiaomi account
 This is not yet reimplemented.
+
+## AGPS
+This script is able to download AGPS files. But login and password are required. 
+The following files are downloaded:
+* AGPS_ALM -- `cep_1week.zip`
+* AGPSZIP -- `cep_7days.zip`
+* LLE -- `lle_1week.zip`
+* AGPS -- `cep_pak.bin`
+* EPO -- `EPO.ZIP`
 
 ## Experimental: updates download
 This is not yet reimplemented.

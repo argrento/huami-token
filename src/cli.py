@@ -46,6 +46,14 @@ def main():
     )
 
     parser.add_argument(
+        "-g",
+        "--gps",
+        required=False,
+        action="store_true",
+        help="Download GPS files (AGPS_ALM, AGPSZIP, LLE, etc.)",
+    )
+
+    parser.add_argument(
         "-n",
         "--no_logout",
         required=False,
@@ -67,6 +75,9 @@ def main():
 
     if args.bt_keys:
         device.get_devices()
+
+    if args.gps:
+        device.download_gps_data()
 
     if args.no_logout:
         print("\nNo logout!")

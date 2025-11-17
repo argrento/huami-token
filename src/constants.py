@@ -35,6 +35,7 @@ class URLS(str, Enum):
     ZEPP_LOGIN = "https://api-mifit-us2.zepp.com/v2/client/login"
     ZEPP_LOGOUT = "https://api-mifit-us2.zepp.com/v1/client/logout"
     ZEPP_DEVICES = "https://api-mifit.zepp.com/users/{user_id}/devices"
+    ZEPP_GPS = "https://api-mifit-us2.zepp.com/apps/com.xiaomi.hm.health/fileTypes/{file_type}/files"
 
 
 class PAYLOADS(dict, Enum):
@@ -99,6 +100,25 @@ class HEADERS(dict, Enum):
         "accept-encoding": "gzip",
     }
 
+    ZEPP_GPS = {
+        "hm-privacy-diagnostics": "false",
+        "country": "US",
+        "appplatform": "android_phone",
+        "hm-privacy-ceip": "false",
+        "x-request-id": None,
+        "timezone": "Europe/London",
+        "channel": MAGIC.ZEPP_CHANNEL.value,
+        "vb": "202509151347",
+        "cv": "151689_9.12.5",
+        "appname": "com.huami.midong",
+        "v": "2.0",
+        "vn": "9.12.5",
+        "apptoken": None,
+        "lang": "en_US",
+        "user-agent": "Zepp/9.12.5 (Pixel 4; Android 12; Density/2.75)",
+        "accept-encoding": "gzip",
+    }
+
     ZEPP_LOGOUT = {
         "app_name": "com.huami.midong",
         "hm-privacy-ceip": "false",
@@ -128,5 +148,19 @@ class URL_PARAMS(dict, Enum):
         "enableMultiDevice": "true",
         "lang": "en_US",
         "timezone": "Europe/London",
+        "v": "2.0",
+    }
+
+    ZEPP_GPS = {
+        "r": None,  # yes, twice again
+        "userid": None,
+        "appid": None,
+        "channel": MAGIC.ZEPP_CHANNEL.value,
+        "country": "US",
+        "cv": "151689_9.12.5",
+        "device": "android_32",
+        "device_type": "android_phone",
+        "lang": "en_US",
+        "timezone": "Europe/Berlin",
         "v": "2.0",
     }
