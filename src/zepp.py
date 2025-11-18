@@ -205,7 +205,7 @@ class Zepp:
         headers["x-request-id"] = str(uuid.uuid4())
         headers["apptoken"] = self.app_token
 
-        for file_type in ["AGPS_ALM", "AGPSZIP", "LLE", "AGPS", "EPO"]:
+        for file_type in ["AGPS_ALM", "AGPSZIP", "LLE", "AGPS", "EPO", "LTO"]:
             response = requests.get(
                 URLS.ZEPP_GPS.value.format(file_type=file_type),
                 params=params,
