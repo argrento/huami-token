@@ -113,11 +113,10 @@ class Zepp:
         payload["code"] = self.access_token
         payload["device_id"] = str(uuid.uuid4())
 
-        # headers are the same as for token request
         response = requests.post(
             URLS.ZEPP_LOGIN.value,
             data=payload,
-            headers=HEADERS.ZEPP_TOKENS.value,
+            headers=HEADERS.ZEPP_LOGIN.value,
         )
         if response.status_code != 200:
             raise AuthenticationError(

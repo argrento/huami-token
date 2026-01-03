@@ -81,6 +81,17 @@ class HEADERS(dict, Enum):
         "accept-encoding": "gzip",
     }
 
+    ZEPP_LOGIN = {
+        "app_name": "com.huami.webapp",
+        "appname": "com.huami.webapp",
+        "origin": "https://user.zepp.com",
+        "referer": "https://user.zepp.com/",
+        "user-agent": "Mozilla/5.0 (X11; Linux x86_64; rv:133.0) Gecko/20100101 Firefox/133.0",
+        "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "accept": "application/json, text/plain, */*",
+        "accept-language": "en-US,en;q=0.5",
+    }
+
     ZEPP_DEVICES = {
         "hm-privacy-diagnostics": "false",
         "country": "US",
