@@ -3,7 +3,7 @@ name = "huami_token"
 version = "0.8.0"
 description = "This script retrieves the Bluetooth access token for the watch or band from Huami servers. Additionally, it downloads the AGPS data packs, cep_alm_pak.zip and cep_7days.zip."
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 authors = [
   { name = "Kirill Snezhko", email = "kirill.snezhko@pm.me" },
 ]
