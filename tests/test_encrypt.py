@@ -1,5 +1,4 @@
-from src.helpers import zepp_encrypt_payload, zepp_decrypt_payload
-import pytest
+from huami_token.helpers import zepp_encrypt_payload, zepp_decrypt_payload
 
 
 def test_zepp_encrypt_decrypt() -> None:

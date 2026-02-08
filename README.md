@@ -5,11 +5,11 @@ Huami-token is now hosted on [codeberg.org](https://codeberg.org/argrento/huami-
 </a>
 
 
-# Huami-token (Redesign in progress)
+# Huami-token
 
 [![status-badge](https://ci.codeberg.org/api/badges/argrento/huami-token/status.svg)](https://ci.codeberg.org/argrento/huami-token)
 
-Script to obtain watch or band bluetooth access token from Zepp (Amazfit) servers. 
+Script to obtain watch or band bluetooth access token from Zepp (Amazfit) servers.
 For progress on Xiaomi support, see https://codeberg.org/argrento/huami-token/issues/119.
 
 ## About
@@ -19,27 +19,36 @@ Read more here: https://gadgetbridge.org/basics/pairing/huami-xiaomi-server/.
 
 ## Community
 
-If you would like to get in touch 
+If you would like to get in touch
 * Matrix: [`#huami-token:matrix.org`](https://matrix.to/#/#huami-token:matrix.org)
 
-## Preparation
+## Installation
+
+### From PyPI
+
+```bash
+pip install huami-token
+```
+
+### From source
 
 1. Ensure that you can login in the Zepp App with e-mail and password. If not, create new Amazfit account
 with e-mail and password.
 2. Pair, sync and update your watch with Zepp App. Your pairing key will be stored on
 Huami servers.
 3. Install `uv`: https://docs.astral.sh/uv/getting-started/installation/
-4. Download this repo.
-5. Go to the source directory.
-6. Create virtual environment: `uv venv`
-7. Activate environment: `source .venv/bin/activate`
-8. Install dependencies: `uv pip install -e ".[dev]"`
+4. Clone this repo and `cd` into it.
+5. Install the package: `uv pip install -e ".[dev]"`
 
 ## Usage
-```
-usage: main.py [-h] -m {amazfit,xiaomi} [-e EMAIL] [-p PASSWORD] [-b] [-n]
 
-Obtain Bluetooth Auth key from Amazfit (Zepp). Currently only supports Amazfit. For progress on Xiaomi support, see https://codeberg.org/argrento/huami-token/issues/119.
+After installation, the `huami-token` command is available:
+
+```
+usage: huami-token [-h] -m {amazfit,xiaomi} [-e EMAIL] [-p PASSWORD] [-b] [-g] [-n]
+
+Obtain Bluetooth Auth key from Amazfit (Zepp). Currently only supports Amazfit.
+For progress on Xiaomi support, see https://codeberg.org/argrento/huami-token/issues/119.
 
 options:
   -h, --help            show this help message and exit
@@ -54,47 +63,74 @@ options:
   -n, --no_logout       Do not logout, keep active session and display app token and access token
 ```
 
+You can also run directly via `python main.py` if you prefer not to install.
 
 ## Logging in with Amazfit account
-Run script with your credentials: `python3 main.py --method amazfit --email youemail@example.com --password your_password --bt_keys`.
+
+Run with your credentials:
+
+```bash
+huami-token --method amazfit --email your_email@example.com --password your_password --bt_keys
+```
 
 Sample output:
-```bash
-> python3 main.py --method amazfit --email my_email --password password --bt_keys
-2025-11-14 18:41:43.316 | INFO     | src.zepp:login:48 - Logging in...
-2025-11-14 18:41:44.268 | INFO     | src.zepp:_get_refresh_and_access_tokens:108 - Received access and refresh tokens successfully
-2025-11-14 18:41:45.217 | INFO     | src.zepp:login:51 - Logged in! User id: 1234567890
-2025-11-14 18:41:45.217 | INFO     | src.zepp:get_devices:151 - Getting linked devices...
-2025-11-14 18:41:45.504 | INFO     | src.zepp:get_devices:190 - Device 0:
-2025-11-14 18:41:45.504 | INFO     | src.zepp:get_devices:191 - MAC: AB:CD:EF:12:34:56, Active: Yes
-2025-11-14 18:41:45.504 | INFO     | src.zepp:get_devices:192 - Key: 0xa3c10e34e5c14637eea6b9efc06106
-2025-11-14 18:41:46.400 | INFO     | src.zepp:logout:219 - Logged out.
+```
+2025-11-14 18:41:43.316 | INFO     | huami_token.zepp:login:67 - Logging in...
+2025-11-14 18:41:44.268 | INFO     | huami_token.zepp:_get_refresh_and_access_tokens:120 - Received access and refresh tokens successfully
+2025-11-14 18:41:45.217 | INFO     | huami_token.zepp:login:70 - Logged in! User id: 1234567890
+2025-11-14 18:41:45.217 | INFO     | huami_token.zepp:get_devices:187 - Getting linked devices...
+Device 0:
+  MAC: AB:CD:EF:12:34:56, Active: Yes
+  Key: 0xa3c10e34e5c14637eea6b9efc06106
+2025-11-14 18:41:46.400 | INFO     | huami_token.zepp:logout:178 - Logged out.
 
+Logged out.
 ```
 
 Here the `Key` is the unique pairing key for your watch. The `Active` tab shows whether a device is
 active or not.
 
 ## Logging in with Xiaomi account
+
 This is not yet reimplemented.
 
 ## AGPS
-This script is able to download AGPS files. But login and password are required. 
+
+This script can download AGPS files (requires login):
+
+```bash
+huami-token --method amazfit --email your_email@example.com --password your_password --gps
+```
+
 The following files are downloaded:
 * AGPS_ALM -- `cep_1week.zip`
 * AGPSZIP -- `cep_7days.zip`
 * LLE -- `lle_1week.zip`
 * AGPS -- `cep_pak.bin`
 * EPO -- `EPO.ZIP`
+* LTO -- LTO data file
 
-## Experimental: updates download
-This is not yet reimplemented.
+## Development
 
+```bash
+uv pip install -e ".[dev]"
+
+# Run tests
+pytest -m "not integration"
+
+# Lint
+ruff check .
+
+# Type check
+mypy huami_token/
+
+# Build wheel
+uv build
+```
 
 ## Dependencies
 
-* Python 3.7.7
-* argparse
+* Python >= 3.10
 * requests
 * loguru
 * pycryptodome

@@ -1,50 +1,41 @@
-pipeline:
-  style_check: 
-    image: python:3.9-buster
-#    when:
-#      event: pull_request
+steps:
+  install:
+    image: python:3.11-slim
     commands:
-      - python -m pip install --upgrade pip
-      - python -m pip install -r requirements.txt
-      - python -m pip install pylint flake8 mypy>=0.971
-      - python -m flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-      - mypy --strict ./
-      - python -m pylint -f parseable src/*.py
-      
-  unit_tests:
-    image: python:${TAG}-buster
-#    when:
-#      event: pull_request
-    commands:
-      - ls
-      - python -m venv venv 
-      - /bin/bash -c "source venv/bin/activate"
-      - python -m pip install --upgrade pip
-      - python -m pip install -r requirements.txt
-      - pytest tests/
-    secrets: [ amazfit_email, amazfit_password ]
+      - pip install uv
+      - uv sync --dev
 
-  wheel_build:
-    image: python:${TAG}-buster
+  lint:
+    image: python:3.11-slim
     commands:
-      - python -m pip install --upgrade pip build wheel
-      - python -m pip install -r requirements.txt
-      - python -m build
+      - pip install uv
+      - uv sync --dev
+      - uv run ruff check .
 
-  wheel_test:
-    image: python:${TAG}-buster
+  typecheck:
+    image: python:3.11-slim
     commands:
-      - python -m pip install --upgrade pip
-      - python -m pip install dist/*.whl
-      - python -m pip install pytest
-      - pytest tests/test_amazfit.py
-      - python -m src -m amazfit -e $AMAZFIT_EMAIL -p $AMAZFIT_PASSWORD -b >/dev/null 2>&1
-    secrets: [ amazfit_email, amazfit_password ]
+      - pip install uv
+      - uv sync --dev
+      - uv run mypy huami_token/
+
+  test:
+    image: python:3.11-slim
+    commands:
+      - pip install uv
+      - uv sync --dev
+      - uv run pytest -m "not integration"
+
+  build:
+    image: python:3.11-slim
+    commands:
+      - pip install uv
+      - uv build
 
   publish_release:
     image: woodpeckerci/plugin-gitea-release
     settings:
-      api_key: 
+      api_key:
         from_secret: api_token
       base_url: https://codeberg.org
       files:
@@ -53,21 +44,16 @@ pipeline:
       checksum: md5
     when:
       event: tag
-    secrets: [ api_token ]
-  
+    secrets: [api_token]
+
   upload_to_index:
-    image: python:3.8-buster
+    image: python:3.11-slim
     commands:
-      - python -m pip install twine
-      - python -m twine check dist/*
-      - python -m twine upload dist/*
+      - pip install uv
+      - uv build
+      - pip install twine
+      - twine check dist/*
+      - twine upload dist/*
     when:
       event: tag
-    secrets: [ twine_username, twine_password ]
-
-matrix:
-  TAG:
-    - 3.8
-    # - 3.9
-    # - 3.10
-    # - 3.11
+    secrets: [twine_username, twine_password]

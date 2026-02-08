@@ -38,7 +38,7 @@ class URLS(str, Enum):
     ZEPP_GPS = "https://api-mifit-us2.zepp.com/apps/com.xiaomi.hm.health/fileTypes/{file_type}/files"
 
 
-class PAYLOADS(dict, Enum):
+class PAYLOADS(dict, Enum):  # type: ignore[misc]
     ZEPP_TOKENS = {
         "emailOrPhone": None,
         "state": "REDIRECTION",
@@ -66,7 +66,7 @@ class PAYLOADS(dict, Enum):
     }
 
 
-class HEADERS(dict, Enum):
+class HEADERS(dict, Enum):  # type: ignore[misc]
     ZEPP_TOKENS = {
         "app_name": "com.huami.midong",
         "appname": "com.huami.midong",
@@ -145,7 +145,7 @@ class HEADERS(dict, Enum):
     }
 
 
-class URL_PARAMS(dict, Enum):
+class URL_PARAMS(dict, Enum):  # type: ignore[misc]
     ZEPP_DEVICES = {
         "r": None,  # yes, twice
         "enableMultiDeviceOnMultiType": ["true", "true"],

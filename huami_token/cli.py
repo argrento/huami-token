@@ -1,25 +1,17 @@
 #!/usr/bin/env python3
-"""Command line interface for huami-token.
-
-This module will eventually replace the CLI functionality in src.py
-as part of the project restructuring.
-"""
+"""Command line interface for huami-token."""
 
 import argparse
 import getpass
+import sys
 from pathlib import Path
 
-from .errors import MigrationInProgressError
+from .errors import HuamiTokenError, LogoutError, MigrationInProgressError
 from .helpers import build_gps_uihh
-from .zepp import Zepp
+from .zepp import ZeppClient, ZeppSession
 
 
-def main():
-    """Main entry point for the CLI.
-
-    Currently just imports and calls the original main function.
-    This will be expanded later to follow the refactoring plan.
-    """
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Obtain Bluetooth Auth key from Amazfit (Zepp). "
         "Currently only supports Amazfit.\nFor progress on Xiaomi support, see "
@@ -34,9 +26,7 @@ def main():
         help="Login method. Chose Amazfit for Zepp.",
     )
     parser.add_argument("-e", "--email", required=False, help="Account e-mail address")
-
     parser.add_argument("-p", "--password", required=False, help="Account Password")
-
     parser.add_argument(
         "-b",
         "--bt_keys",
@@ -44,7 +34,6 @@ def main():
         action="store_true",
         help="Get bluetooth tokens of paired devices",
     )
-
     parser.add_argument(
         "-g",
         "--gps",
@@ -52,7 +41,6 @@ def main():
         action="store_true",
         help="Download GPS files (AGPS_ALM, AGPSZIP, LLE, etc.)",
     )
-
     parser.add_argument(
         "-n",
         "--no_logout",
@@ -64,32 +52,48 @@ def main():
 
     args = parser.parse_args()
 
-    match args.method:
-        case "amazfit":
-            if args.password is None:
-                args.password = getpass.getpass()
-            device = Zepp(username=args.email, password=args.password)
-            device.login()
-        case "xiaomi":
-            raise MigrationInProgressError()
+    try:
+        match args.method:
+            case "amazfit":
+                if args.password is None:
+                    args.password = getpass.getpass()
+                session = ZeppSession(username=args.email, password=args.password)
+                session.login()
+                client = ZeppClient(session)
+            case "xiaomi":
+                raise MigrationInProgressError()
 
-    if args.bt_keys:
-        device.get_devices()
+        if args.bt_keys:
+            devices = client.get_devices()
+            for i, device in enumerate(devices):
+                active = "Yes" if device.active else "No"
+                print(f"Device {i}:")
+                print(f"  MAC: {device.mac}, Active: {active}")
+                print(f"  Key: 0x{device.auth_key}")
 
-    if args.gps:
-        device.download_gps_data()
-        build_gps_uihh(base_folder=Path.cwd())
+        if args.gps:
+            output_dir = Path.cwd()
+            client.download_gps_data(output_dir)
+            build_gps_uihh(base_folder=output_dir)
 
-    if args.no_logout:
-        print("\nNo logout!")
-        print(f"app_token={device.app_token}\nlogin_token={device.login_token}")
-    else:
-        logout_result = device.logout()
-        if logout_result == "ok":
-            print("\nLogged out.")
+        if args.no_logout:
+            print("\nNo logout!")
+            print(f"app_token={session.app_token}\nlogin_token={session.login_token}")
         else:
-            print("\nError logging out.")
+            try:
+                session.logout()
+                print("\nLogged out.")
+            except LogoutError:
+                print("\nError logging out.")
+
+    except MigrationInProgressError:
+        raise
+    except HuamiTokenError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        return 1
+
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

@@ -7,6 +7,7 @@ __pycache__
 *.fw
 *.bin
 venv
+.venv/
 .mypy_cache
 dist
 akps/
