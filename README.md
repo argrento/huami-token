@@ -24,7 +24,7 @@ If you would like to get in touch
 
 ## Installation
 
-### From PyPI
+### From PyPI (currently outdated)
 
 ```bash
 pip install huami-token
