@@ -1,3 +1,6 @@
+when:
+  event: [push, pull_request, tag]
+
 steps:
   install:
     image: python:3.11-slim
@@ -44,7 +47,6 @@ steps:
       checksum: md5
     when:
       event: tag
-    secrets: [api_token]
 
   upload_to_index:
     image: python:3.11-slim
@@ -54,6 +56,10 @@ steps:
       - pip install twine
       - twine check dist/*
       - twine upload dist/*
+    environment:
+      TWINE_USERNAME:
+        from_secret: twine_username
+      TWINE_PASSWORD:
+        from_secret: twine_password
     when:
       event: tag
-    secrets: [twine_username, twine_password]
