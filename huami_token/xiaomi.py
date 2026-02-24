@@ -314,8 +314,6 @@ class XiaomiClient:
         return {
             "User-Agent": (
                 "Android-12-9.8.348i-google-Pixel 4"
-                "-9662439c53cde76bada1f6e65ecd4a76"
-                "-a06897b13b57b766f3b080a1ef76cdb5"
             ),
             "Accept-Encoding": "gzip",
             "region_tag": self.region,
