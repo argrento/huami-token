@@ -1,28 +1,50 @@
-# Copyright (c) 2021 Kirill Snezhko
-
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
+# Copyright (c) 2025 Kirill Snezhko
+# MIT License
 
 """Module for storing error messages"""
 
-ERRORS = {
-    "0106": "0106. Verification failed, wrong token.",
-    "0113": "0113. Wrong region.",
-    "0115": "0115. Account disabled.",
-    "0117": "0117. Account not registered."
-}
+from __future__ import annotations
+
+
+class MigrationInProgressError(Exception):
+    """Exception raised when a non-implemented feature is called.."""
+
+    def __init__(self, message: str | None = None):
+        self.message = message or (
+            "This feature is not yet reverse-engineered. "
+            "Track progress here: https://codeberg.org/argrento/huami-token/issues/119"
+        )
+        super().__init__(self.message)
+
+
+class HuamiTokenError(Exception):
+    """Base class for exceptions in Zepp/Amazfit module."""
+
+    pass
+
+
+class AuthenticationError(HuamiTokenError):
+    """Exception raised for authentication errors."""
+
+    def __init__(self, code: str | None = None, message: str | None = None):
+        self.code = code
+        self.message = message or f"Authentication failed (code={code})"
+        super().__init__(self.message)
+
+
+class LogoutError(HuamiTokenError):
+    """Exception raised for logout errors."""
+
+    def __init__(self, code: str | None = None, message: str | None = None):
+        self.code = code
+        self.message = message or f"Logout failed (code={code})"
+        super().__init__(self.message)
+
+
+class DeviceError(HuamiTokenError):
+    """Exception raised for device-related errors."""
+
+    def __init__(self, code: str | None = None, message: str | None = None):
+        self.code = code
+        self.message = message or f"Device error (code={code})"
+        super().__init__(self.message)

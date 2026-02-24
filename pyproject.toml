@@ -1,33 +1,54 @@
-[build-system]
-requires = ["flit_core>=3.4"]
-build-backend = "flit_core.buildapi"
-
 [project]
 name = "huami_token"
-version = "0.7.0"
-authors = [
-  { name="Kirill Snezhko", email="kirill.snezhko@pm.me" },
-]
+version = "0.8.0"
 description = "This script retrieves the Bluetooth access token for the watch or band from Huami servers. Additionally, it downloads the AGPS data packs, cep_alm_pak.zip and cep_7days.zip."
 readme = "README.md"
-requires-python = ">=3.7"
-classifiers = [
-    "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent",
+requires-python = ">=3.10"
+authors = [
+  { name = "Kirill Snezhko", email = "kirill.snezhko@pm.me" },
 ]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+]
+
 dependencies = [
-    "requests == 2.25.1",
-    "types-requests == 2.25.1"
+  "loguru>=0.7.3",
+  "pycryptodome>=3.23.0",
+  "requests>=2.31.0,<3",
+]
+
+[project.scripts]
+huami-token = "huami_token.cli:main"
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8,<9",
+  "types-requests>=2.31.0.20231231",
+  "ruff>=0.5,<1",
+  "mypy>=1.10,<2",
 ]
 
 [project.urls]
 "Homepage" = "https://codeberg.org/argrento/huami-token"
 "Bug Tracker" = "https://codeberg.org/argrento/huami-token/issues"
 
-[project.scripts]
-huami_token = "huami_token:main"
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
 
+[tool.hatch.build.targets.wheel]
+packages = ["huami_token"]
 
-[project.optional-dependencies]
-test = ["pytest-pylint==0.18.0", "pytest-flake8==1.0.6"]
+[tool.pytest.ini_options]
+markers = ["integration: real API integration tests (require --email and --password)"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.mypy]
+python_version = "3.11"
+warn_unused_ignores = true
+warn_redundant_casts = true

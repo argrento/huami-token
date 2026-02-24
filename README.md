@@ -11,147 +11,145 @@ Huami-token is now hosted on [codeberg.org](https://codeberg.org/argrento/huami-
 
 [![status-badge](https://ci.codeberg.org/api/badges/argrento/huami-token/status.svg)](https://ci.codeberg.org/argrento/huami-token)
 
-Script to obtain watch or band bluetooth access token from Huami servers.
-It will also download AGPS data packs `cep_alm_pak.zip` and `cep_7days.zip`.
+Script to obtain watch or band bluetooth access token from Zepp (Amazfit) or Xiaomi Mi Fitness servers.
 
 ## About
 
 To use new versions of Amazfit and Xiaomi watches and bands with Gadgetbridge you need special unique key.
-Read more here: https://codeberg.org/Freeyourgadget/Gadgetbridge/wiki/Huami-Server-Pairing.
+Read more here: https://gadgetbridge.org/basics/pairing/huami-xiaomi-server/.
 
 ## Community
 
-If you would like to get in touch 
+If you would like to get in touch
 * Matrix: [`#huami-token:matrix.org`](https://matrix.to/#/#huami-token:matrix.org)
 
-## Preparation
+## Installation
 
-1. Ensure that you login in Amazfit App with Amazfit or Xiaomi account --
-because only this login methods are supported. If not, create new Amazfit account
+### From PyPI (currently outdated)
+
+```bash
+pip install huami-token
+```
+
+### From source
+
+1. Ensure that you can login in the Zepp App with e-mail and password. If not, create new Amazfit account
 with e-mail and password.
-2. Pair, sync and update your watch with Amazfit App. Your pairing key will be stored on
+2. Pair, sync and update your watch with Zepp App. Your pairing key will be stored on
 Huami servers.
-3. `pip3 install huami_token`
-4. Use like this: `python3 -m huami_token ...`
+3. Install `uv`: https://docs.astral.sh/uv/getting-started/installation/
+4. Clone this repo and `cd` into it.
+5. Install the package: `uv pip install -e ".[dev]"`
 
 ## Usage
+
+After installation, the `huami-token` command is available:
+
 ```
-usage: huami_token.py [-h] -m {amazfit,xiaomi} [-e EMAIL] [-p PASSWORD] [-b]
-                      [-g] [-a] [-n]
+usage: huami-token [-h] -m {amazfit,xiaomi} [-e EMAIL] [-p PASSWORD] [-b] [-g] [-n]
 
-Obtain Bluetooth Auth key from Amazfit servers and download AGPS data.
+Obtain Bluetooth Auth key from Amazfit (Zepp) or Xiaomi Mi Fitness.
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   -m {amazfit,xiaomi}, --method {amazfit,xiaomi}
-                        Login method
+                        Login method. Chose Amazfit for Zepp.
   -e EMAIL, --email EMAIL
                         Account e-mail address
   -p PASSWORD, --password PASSWORD
                         Account Password
   -b, --bt_keys         Get bluetooth tokens of paired devices
-  -g, --gps             Download A-GPS files
-  -f, --firmware        Request firmware updates. Works only with -b/--bt_keys
-                        argument. Extremely dangerous
-  -a, --all             Do everything: get bluetooth tokens, download A-GPS
-                        files. But do NOT download firmware updates
-  -n, --no_logout       Do not logout, keep active session and display app
-                        token and access token
+  -g, --gps             Download GPS files (AGPS_ALM, AGPSZIP, LLE, etc.)
+  -n, --no_logout       Do not logout, keep active session and display app token and access token
 ```
 
+You can also run directly via `python main.py` if you prefer not to install.
 
 ## Logging in with Amazfit account
-Run script with your credentials: `python3 huami_token.py --method amazfit --email youemail@example.com --password your_password --bt_keys`.
+
+Run with your credentials:
+
+```bash
+huami-token --method amazfit --email your_email@example.com --password your_password --bt_keys
+```
 
 Sample output:
-```bash
-> python3 huami_token.py --method amazfit --email my_email --password password --bt_keys
-Getting access token with amazfit login method...
-Token: ['UaFHW53RJVYwqXaa7ncPQ']
-Logging in...
-Logged in! User id: 1234567890
-Getting linked wearables...
-
-╓───Device 0
-║  MAC: AB:CD:EF:12:34:56, active: Yes
-║  Key: 0xa3c10e34e5c14637eea6b9efc06106
-╙────────────
+```
+2025-11-14 18:41:43.316 | INFO     | huami_token.zepp:login:67 - Logging in...
+2025-11-14 18:41:44.268 | INFO     | huami_token.zepp:_get_refresh_and_access_tokens:120 - Received access and refresh tokens successfully
+2025-11-14 18:41:45.217 | INFO     | huami_token.zepp:login:70 - Logged in! User id: 1234567890
+2025-11-14 18:41:45.217 | INFO     | huami_token.zepp:get_devices:187 - Getting linked devices...
+Device 0:
+  MAC: AB:CD:EF:12:34:56, Active: Yes
+  Key: 0xa3c10e34e5c14637eea6b9efc06106
+2025-11-14 18:41:46.400 | INFO     | huami_token.zepp:logout:178 - Logged out.
 
 Logged out.
 ```
 
-Here the `auth_key` is the unique pairing key for your watch. The `ACT` tab shows whether a device is
+Here the `Key` is the unique pairing key for your watch. The `Active` tab shows whether a device is
 active or not.
 
-### Logging in with Xiaomi account
-This is a little bit harder to use, since you need to login manually on the Xiaomi web site.
+## Logging in with Xiaomi account
 
-1. Run script `python3 huami_token.py --method xiaomi --bt_keys`.
-2. Script will ask you to open Xiaomi login web page. https://account.xiaomi.com/oauth2/authorize?skip_confirm=false&client_id=2882303761517383915&pt=0&scope=1+6000+16001+20000&redirect_uri=https%3A%2F%2Fhm.xiaomi.com%2Fwatch.do&_locale=en_US&response_type=code
-3. Login with your credentials there.
-4. If your login is successful, browser will show the error that connection is not secured.
-On this stage address will look like this: `https://hm.xiaomi.com/watch.do?code=ALSG_CLOUDSRV_9B8D87D0EB77C71B45FF73B2266D922B`.
-5. Copy this address.
-6. Return to script, paste this address and press `enter`.
-
-Sample output:
 ```bash
-> python3 huami_token.py --method xiaomi --bt_keys
-Getting access token with xiaomi login method...
-Copy this URL to web-browser
-
-https://account.xiaomi.com/oauth2/authorize?skip_confirm=false&client_id=2882303761517383915&pt=0&scope=1+6000+16001+20000&redirect_uri=https%3A%2F%2Fhm.xiaomi.com%2Fwatch.do&_locale=en_US&response_type=code
-
-and login to your Mi account.
-
-Paste URL after redirection here.
-https://hm.xiaomi.com/watch.do?code=ALSG_CLOUDSRV_9B8D87D0EB77C71B45FF73B2266D922B
-Token: ['ALSG_CLOUDSRV_9B8D87D0EB77C71B45FF73B2266D922B']
-Logging in...
-Logged in! User id: 3000654321
-Getting linked wearables...
-
-╓───Device 0
-║  MAC: 12:34:56:AB:CD:EF, active: Yes
-║  Key: 0x3c10e34e5c1463527579996fa83e6d
-╙────────────
-
-╓───Device 1
-║  MAC: BA:DC:FE:21:43:65, active: No
-║  Key: 0x00
-╙────────────
-
-Logged out.
+huami-token --method xiaomi --email your_email@example.com --password your_password --bt_keys
 ```
 
-Here the `auth_key` is the unique pairing key for your watch. The `ACT` tab shows whether a device is
-active or not.
+Sample output:
+```
+2025-11-14 18:41:43.316 | INFO     | huami_token.xiaomi:login:81 - Logging in to Xiaomi...
+2025-11-14 18:41:44.268 | INFO     | huami_token.xiaomi:login:85 - Logged in! User id: 1234567890
+Device 0: Amazfit Band 7
+  MAC: AB:CD:EF:12:34:56
+  Key: 0xa3c10e34e5c14637eea6b9efc06106
 
-In this example I have two devices: the first one is my Amazfit Bip S watch,
-the second one is my Xiaomi Mi Smart Scale.
+Logged in successfully.
+user_id=1234567890
+```
 
-## Experimental: updates download
+Note: GPS download (`--gps`) is not yet supported for Xiaomi accounts.
 
-This is extremely dangerous: flashing the wrong version can brick your device!
-I am not responsible for any of problems that might arise.
+## AGPS
 
-Can be enabled with `-f/--firmware` argument. Will work only with `-b/--bt_keys` argument.
-You should input the ID of a device, or `-1` to check for all.
-Script will try to find updates for the firmware and the font pack for the device from 
-the table above.
+This script can download AGPS files (requires login):
 
-Use the downloaded files at your own risk!
+```bash
+huami-token --method amazfit --email your_email@example.com --password your_password --gps
+```
+
+The following files are downloaded:
+* AGPS_ALM -- `cep_1week.zip`
+* AGPSZIP -- `cep_7days.zip`
+* LLE -- `lle_1week.zip`
+* AGPS -- `cep_pak.bin`
+* EPO -- `EPO.ZIP`
+* LTO -- LTO data file
+
+## Development
+
+```bash
+uv pip install -e ".[dev]"
+
+# Run tests
+pytest -m "not integration"
+
+# Lint
+ruff check .
+
+# Type check
+mypy huami_token/
+
+# Build wheel
+uv build
+```
 
 ## Dependencies
 
-* Python 3.7.7
-* argparse
+* Python >= 3.10
 * requests
-* urllib
-* random
-* uuid
-* json
-* shutil
+* loguru
+* pycryptodome
 
 ## License
 
