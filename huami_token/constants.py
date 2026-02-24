@@ -145,6 +145,34 @@ class HEADERS(dict, Enum):  # type: ignore[misc]
     }
 
 
+class XIAOMI_URLS(str, Enum):
+    SERVICE_LOGIN = "https://account.xiaomi.com/pass/serviceLogin"
+    SERVICE_LOGIN_AUTH2 = "https://account.xiaomi.com/pass/serviceLoginAuth2"
+
+
+class XIAOMI_HEADERS(dict, Enum):  # type: ignore[misc]
+    SERVICE_LOGIN = {
+        "User-Agent": (
+            "Mozilla/5.0 (Linux; Android 12; Pixel 4 Build/SP1A.210812.016.C1;"
+            " wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0"
+            " Chrome/131.0.6778.200 Mobile Safari/537.36"
+        ),
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.5",
+    }
+
+    SERVICE_LOGIN_AUTH2 = {
+        "User-Agent": (
+            "Mozilla/5.0 (Linux; Android 12; Pixel 4 Build/SP1A.210812.016.C1;"
+            " wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0"
+            " Chrome/131.0.6778.200 Mobile Safari/537.36"
+        ),
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.5",
+    }
+
+
 class URL_PARAMS(dict, Enum):  # type: ignore[misc]
     ZEPP_DEVICES = {
         "r": None,  # yes, twice

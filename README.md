@@ -9,8 +9,7 @@ Huami-token is now hosted on [codeberg.org](https://codeberg.org/argrento/huami-
 
 [![status-badge](https://ci.codeberg.org/api/badges/argrento/huami-token/status.svg)](https://ci.codeberg.org/argrento/huami-token)
 
-Script to obtain watch or band bluetooth access token from Zepp (Amazfit) servers.
-For progress on Xiaomi support, see https://codeberg.org/argrento/huami-token/issues/119.
+Script to obtain watch or band bluetooth access token from Zepp (Amazfit) or Xiaomi Mi Fitness servers.
 
 ## About
 
@@ -47,8 +46,7 @@ After installation, the `huami-token` command is available:
 ```
 usage: huami-token [-h] -m {amazfit,xiaomi} [-e EMAIL] [-p PASSWORD] [-b] [-g] [-n]
 
-Obtain Bluetooth Auth key from Amazfit (Zepp). Currently only supports Amazfit.
-For progress on Xiaomi support, see https://codeberg.org/argrento/huami-token/issues/119.
+Obtain Bluetooth Auth key from Amazfit (Zepp) or Xiaomi Mi Fitness.
 
 options:
   -h, --help            show this help message and exit
@@ -92,7 +90,23 @@ active or not.
 
 ## Logging in with Xiaomi account
 
-This is not yet reimplemented.
+```bash
+huami-token --method xiaomi --email your_email@example.com --password your_password --bt_keys
+```
+
+Sample output:
+```
+2025-11-14 18:41:43.316 | INFO     | huami_token.xiaomi:login:81 - Logging in to Xiaomi...
+2025-11-14 18:41:44.268 | INFO     | huami_token.xiaomi:login:85 - Logged in! User id: 1234567890
+Device 0: Amazfit Band 7
+  MAC: AB:CD:EF:12:34:56
+  Key: 0xa3c10e34e5c14637eea6b9efc06106
+
+Logged in successfully.
+user_id=1234567890
+```
+
+Note: GPS download (`--gps`) is not yet supported for Xiaomi accounts.
 
 ## AGPS
 

@@ -6,16 +6,15 @@ import getpass
 import sys
 from pathlib import Path
 
-from .errors import HuamiTokenError, LogoutError, MigrationInProgressError
+from .errors import HuamiTokenError, LogoutError
 from .helpers import build_gps_uihh
+from .xiaomi import XiaomiClient, XiaomiSession
 from .zepp import ZeppClient, ZeppSession
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Obtain Bluetooth Auth key from Amazfit (Zepp). "
-        "Currently only supports Amazfit.\nFor progress on Xiaomi support, see "
-        "https://codeberg.org/argrento/huami-token/issues/119."
+        description="Obtain Bluetooth Auth key from Amazfit (Zepp) or Xiaomi Mi Fitness."
     )
     parser.add_argument(
         "-m",
@@ -60,34 +59,67 @@ def main() -> int:
                 session = ZeppSession(username=args.email, password=args.password)
                 session.login()
                 client = ZeppClient(session)
+
+                if args.bt_keys:
+                    devices = client.get_devices()
+                    for i, device in enumerate(devices):
+                        active = "Yes" if device.active else "No"
+                        print(f"Device {i}:")
+                        print(f"  MAC: {device.mac}, Active: {active}")
+                        print(f"  Key: 0x{device.auth_key}")
+
+                if args.gps:
+                    output_dir = Path.cwd()
+                    client.download_gps_data(output_dir)
+                    build_gps_uihh(base_folder=output_dir)
+
+                if args.no_logout:
+                    print("\nNo logout!")
+                    print(f"app_token={session.app_token}\nlogin_token={session.login_token}")
+                else:
+                    try:
+                        session.logout()
+                        print("\nLogged out.")
+                    except LogoutError:
+                        print("\nError logging out.")
+
             case "xiaomi":
-                raise MigrationInProgressError()
+                if args.password is None:
+                    args.password = getpass.getpass()
+                xi_session = XiaomiSession(username=args.email, password=args.password)
+                xi_session.login()
 
-        if args.bt_keys:
-            devices = client.get_devices()
-            for i, device in enumerate(devices):
-                active = "Yes" if device.active else "No"
-                print(f"Device {i}:")
-                print(f"  MAC: {device.mac}, Active: {active}")
-                print(f"  Key: 0x{device.auth_key}")
+                if args.bt_keys:
+                    xi_client = XiaomiClient(xi_session)
+                    result = xi_client.get_source_list()
+                    sources = result.get("result", {}).get("list") or []
+                    if not sources:
+                        print("No bound devices found.")
+                    for i, source in enumerate(sources):
+                        name = source.get("name", "Unknown").strip()
+                        detail = source.get("detail", {})
+                        if isinstance(detail, str):
+                            import json
+                            detail = json.loads(detail)
+                        mac = detail.get("mac", source.get("mac", "??:??:??:??:??:??"))
+                        auth_key = detail.get("auth_key", "")
+                        print(f"Device {i}: {name}")
+                        print(f"  MAC: {mac}")
+                        if auth_key:
+                            print(f"  Key: 0x{auth_key}")
+                        else:
+                            print(f"  Key: (not available)")
 
-        if args.gps:
-            output_dir = Path.cwd()
-            client.download_gps_data(output_dir)
-            build_gps_uihh(base_folder=output_dir)
+                if args.no_logout:
+                    print("\nNo logout!")
+                    print(f"ssecurity={xi_session.ssecurity}")
+                    print(f"service_token={xi_session.service_token}")
+                    print(f"user_id={xi_session.user_id}")
+                    print(f"c_user_id={xi_session.c_user_id}")
+                else:
+                    print("\nLogged in successfully.")
+                    print(f"user_id={xi_session.user_id}")
 
-        if args.no_logout:
-            print("\nNo logout!")
-            print(f"app_token={session.app_token}\nlogin_token={session.login_token}")
-        else:
-            try:
-                session.logout()
-                print("\nLogged out.")
-            except LogoutError:
-                print("\nError logging out.")
-
-    except MigrationInProgressError:
-        raise
     except HuamiTokenError as e:
         print(f"Error: {e}", file=sys.stderr)
         return 1
