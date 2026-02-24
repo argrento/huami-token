@@ -108,7 +108,7 @@ def main() -> int:
                         if auth_key:
                             print(f"  Key: 0x{auth_key}")
                         else:
-                            print(f"  Key: (not available)")
+                            print("  Key: (not available)")
 
                 if args.no_logout:
                     print("\nNo logout!")
