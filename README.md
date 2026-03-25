@@ -37,7 +37,8 @@ with e-mail and password.
 Huami servers.
 3. Install `uv`: https://docs.astral.sh/uv/getting-started/installation/
 4. Clone this repo and `cd` into it.
-5. Install the package: `uv pip install -e ".[dev]"`
+5. Install the package: `uv pip install -e ".[dev] --system"`
+6. Add the huami-token executable to the environment `pyenv rehash`
 
 ## Usage
 
