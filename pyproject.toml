@@ -24,7 +24,7 @@ huami-token = "huami_token.cli:main"
 
 [project.optional-dependencies]
 dev = [
-  "pytest>=8,<9",
+  "pytest>=8,<10",
   "types-requests>=2.31.0.20231231",
   "ruff>=0.5,<1",
   "mypy>=1.10,<2",
